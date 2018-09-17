@@ -24,8 +24,6 @@ Route::middleware(['auth:api'])->group(function () {
     	return response()->json([]);
     });
 
-
-
 	Route::get('/users/{id}' , 'UsersController@show');
     Route::post('/usuario','UsersController@registro');
     Route::post('/usuario/{id}','UsersController@update');
@@ -33,15 +31,10 @@ Route::middleware(['auth:api'])->group(function () {
 	Route::get('/usuario/busqueda', 'UsersController@busqueda');
 	Route::get('/usuario/conteo', 'UsersController@conteo');
 	Route::put('/password/{id}','UsersController@changePassword');
-	
-	
-
-
-	
 
  });
 
-  
+ Route::get('/Botellas/{id}','controladorBotellas@todasLasBotellas'); 
 
 // no auth required
 
