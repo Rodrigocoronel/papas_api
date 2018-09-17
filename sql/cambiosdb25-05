@@ -1,0 +1,3 @@
+ALTER TABLE `lista_ticket` DROP `updated_at`, DROP `created_at`;
+
+ALTER TABLE `lista_ticket` ADD `cantidad` TINYINT NULL AFTER `inventario_id`;
