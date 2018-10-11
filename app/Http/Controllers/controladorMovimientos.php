@@ -3,45 +3,26 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Database\Query\Expression as Expression;
 
-use App\Movimientos;
+use App\Movimiento;
 
 class controladorMovimientos extends Controller
 {
-
-     public function registro(Request $request){
-       
-        $user = $request->input();
-        $user['password'] = bcrypt($user['password']);
-        $registro = User::create($user);
-
-        return response()->json($this->build_user($registro));
-
+    public function registrarMovimiento(Request $datos){
+        //$post = new Post;
+        //$post->all = $request->all();
+        //$post->save();
     }
-
-
-    public function show($id)
-    {
-
-            $data = User::find($id);
-            return response()->json($data);
+    
+    public function movimientosPorFolio($folio){
+        $lista = Movimientos::where('id_botella','=',$folio)->get();
+        return response()->json($lista);
     }
-
-
-
-    public function build_user($u){
-        return [
-            'value' => $u->id,
-            'label' => $u->name,
-            'correo' => $u->email,];
+    
+    public function salidas($area,$fecha){
+        $lista = Movimientos::where('id_origen','=',$area)->where('fecha','=',$fecha)->get();
+        return response()->json($lista);
     }
-
-
-
-
-
-
-
-
 }

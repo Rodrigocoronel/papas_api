@@ -31,10 +31,22 @@ Route::middleware(['auth:api'])->group(function () {
 	Route::get('/usuario/busqueda', 'UsersController@busqueda');
 	Route::get('/usuario/conteo', 'UsersController@conteo');
 	Route::put('/password/{id}','UsersController@changePassword');
+    
+    Route::post('/BotellaNueva','controladorBotellas@registrarBotella');             // Registrar nueva botella
 
  });
 
- Route::get('/Botellas/{id}','controladorBotellas@todasLasBotellas'); 
+ // Botellas
+ 
+ Route::get('/Botella/{folio}','controladorBotellas@botellaPorFolio');                   // Encontrar Por Folio
+ Route::get('/Botellas/{insumo}','controladorBotellas@botellaPorCodigoDeInsumo');        // Encontrar Por numero de insumo
+ Route::get('/NombreBotellas/{desc}','controladorBotellas@botellasPorNombre');           // Encontrar Por descripcion
+ Route::get('/Botellas','controladorBotellas@todasLasBotellas');                         // Listar todas
 
-// no auth required
+ // Movimientos
+ Route::get('/MovimientoNuevo/{datos}','controladorMovimientos@registrarMovimiento');    // Registrar nuevo movimiento
+ Route::get('/Movimientos/{folio}','controladorMovimientos@movimientosPorFolio');        // Buscar movimientos de un folio especifico (botella)
+ Route::get('/SalidasPorArea/{area}/{fecha}','controladorMovimientos@salidas');             // Reporte de salidas y traspasos por area y fecha
 
+ // Todo
+ Route::get('Historial/{folio}','Post@');

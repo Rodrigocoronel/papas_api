@@ -4,19 +4,14 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Movimientos extends Model
+class Almacen extends Model
 {
-    protected $table = 'lista_movimientos';
+    protected $table = 'Almacenes';
     
     // Campos de la tabla que estan disponibles para modificacion
     protected $fillable = [
                 'id',
-                'id_botella',
-                'id_mov',
-                'id_origen',
-                'id_destino',
-                'fecha',
-                'user'
+                'nombre',
             ];
 
     // Campos de la tabla no visibles para el usuario
