@@ -14,23 +14,20 @@ class controladorBotellas extends Controller
         
         $user = $datos->user();
         $data = $datos->input();
-                
-        $registro = Botella::create($data);
-        
-        $mov[0] =[
-            "almacen_origen_id"=> 0,
-            'movimiento_id' => 1,
-            'almacen_destino_id' => 1,
-            'fecha' => date('Y-m-d'),
-            'user' => $user->id,
-             
-        ];
-        
-        $registro->productos()->attach($mov);
-        
-        
-        
-        return response()->json($mov);
+        $registrado  = false;
+        if(!Botella::where('folio','=',$data['folio'])->exists())
+        {
+            $registro = Botella::create($data);
+            $mov[0] =[
+                "almacen_id"=> 0,
+                'movimiento_id' => 1,
+                'fecha'=> date('Y-m-d'),
+                'user' => $user->id,
+            ];
+            $registro->movimientos()->attach($mov);
+            $registrado = true;
+        }
+        return response()->json($registrado);
     }
     
     public function botellaPorFolio($folio){

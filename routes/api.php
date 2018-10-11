@@ -34,14 +34,19 @@ Route::middleware(['auth:api'])->group(function () {
     
     Route::post('/BotellaNueva','controladorBotellas@registrarBotella');             // Registrar nueva botella
 
+    Route::post('/AlmacenNuevo','controladorAlmacenes@registrarAlmacen');
+    
  });
 
  // Botellas
- 
  Route::get('/Botella/{folio}','controladorBotellas@botellaPorFolio');                   // Encontrar Por Folio
  Route::get('/Botellas/{insumo}','controladorBotellas@botellaPorCodigoDeInsumo');        // Encontrar Por numero de insumo
  Route::get('/NombreBotellas/{desc}','controladorBotellas@botellasPorNombre');           // Encontrar Por descripcion
  Route::get('/Botellas','controladorBotellas@todasLasBotellas');                         // Listar todas
+
+ //Almacenes
+ Route::get('/Almacen/{id}','controladorAlmacenes@almacenPorId');
+ Route::get('/Almacenes','controladorAlmacenes@todosLosAlmacenes');
 
  // Movimientos
  Route::get('/MovimientoNuevo/{datos}','controladorMovimientos@registrarMovimiento');    // Registrar nuevo movimiento
