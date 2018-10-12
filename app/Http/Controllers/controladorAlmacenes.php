@@ -30,7 +30,7 @@ class controladorAlmacenes extends Controller
     }
     
     public function todosLosAlmacenes(){
-        $lista = Almacen::all();
+        $lista = Almacen::where('id','>',0)->get();
         return response()->json($lista);
     }
 }
