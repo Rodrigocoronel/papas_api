@@ -19,9 +19,9 @@ class controladorBotellas extends Controller
         {
             $registro = Botella::create($data);
             $mov[0] =[
-                "almacen_id"=> 0,
+                "almacen_id"=> 1,
                 'movimiento_id' => 1,
-                'fecha'=> date('Y-m-d'),
+                'fecha'=> date('Y-m-d H:i:s'),
                 'user' => $user->id,
             ];
             $registro->movimientos()->attach($mov);
@@ -35,6 +35,9 @@ class controladorBotellas extends Controller
         if(!$registro->isEmpty())
         {
             $registro[0]['almacen'] = $registro[0]->almacen;
+            
+
+                
             $registro[0]['mov'] = $registro[0]->movimientoArray;
         }
         return response()->json($registro);

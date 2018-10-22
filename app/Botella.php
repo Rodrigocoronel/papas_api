@@ -10,13 +10,14 @@ class Botella extends Model
     
     // Campos de la tabla que estan disponibles para modificacion
     protected $fillable = [
-                'id',
-                'folio',
-                'insumo',
-                'desc_insumo',
-                'fecha_compra',
-                'almacen_actual'
-            ];
+        'id',
+        'folio',
+        'insumo',
+        'desc_insumo',
+        'fecha_compra',
+        'almacen_id',
+        'transito'
+    ];
 
     // Campos de la tabla no visibles para el usuario
     protected $hidden = [];
@@ -30,7 +31,8 @@ class Botella extends Model
         return $this->belongsToMany(
             'App\Almacen',
             'lista_movimientos',
-            'botella_id', 'almacen_id')
+            'botella_id',
+            'almacen_id')
             ->withPivot(
             'movimiento_id',
             'fecha',
@@ -40,7 +42,7 @@ class Botella extends Model
     
     public function almacen()
     {
-        return $this->belongsTo('App\Almacen', 'almacen_actual');
+        return $this->belongsTo('App\Almacen', 'almacen_id');
     }
         
     public function getMovimientoArrayAttribute() {
@@ -50,17 +52,16 @@ class Botella extends Model
         foreach ($this->movimientos as $movimiento) {
 
             $output[] = [
-                "id"               => $movimiento->id,
-                "botella_id"       => $movimiento->pivot->botella_id,
-                "movimiento_id"    => $movimiento->pivot->movimiento_id,
-                "almacen_id"       => $movimiento->pivot->almacen_id,
-                "fecha"            => $movimiento->pivot->fecha,
-                "user"             => $movimiento->pivot->user,
+                "id"                => $movimiento->id,
+                "botella_id"        => $movimiento->pivot->botella_id,
+                "movimiento_id"     => $movimiento->pivot->movimiento_id,
+                "almacen_id"        => $movimiento->pivot->almacen_id,
+                "almacen_nombre"    => $movimiento->nombre,
+                "fecha"             => $movimiento->pivot->fecha,
+                "user"              => $movimiento->pivot->user,
             ];
         }
-
         return $output;
-
     }
 
 }

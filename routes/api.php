@@ -33,8 +33,8 @@ Route::middleware(['auth:api'])->group(function () {
 	Route::put('/password/{id}','UsersController@changePassword');
     
     Route::post('/BotellaNueva','controladorBotellas@registrarBotella');             // Registrar nueva botella
-
     Route::post('/AlmacenNuevo','controladorAlmacenes@registrarAlmacen');
+    Route::post('/MovimientoNuevo','controladorMovimientos@registrarMovimiento');    // Registrar nuevo movimiento
     
  });
 
@@ -49,7 +49,7 @@ Route::middleware(['auth:api'])->group(function () {
  Route::get('/Almacenes','controladorAlmacenes@todosLosAlmacenes');
 
  // Movimientos
- Route::get('/MovimientoNuevo/{datos}','controladorMovimientos@registrarMovimiento');    // Registrar nuevo movimiento
+
  Route::get('/Movimientos/{folio}','controladorMovimientos@movimientosPorFolio');        // Buscar movimientos de un folio especifico (botella)
  Route::get('/SalidasPorArea/{area}/{fecha}','controladorMovimientos@salidas');             // Reporte de salidas y traspasos por area y fecha
 
