@@ -22,25 +22,32 @@ class controladorMovimientos extends Controller
             $registro = Botella::where('folio','=',$data['folio'])->first();
             switch($data['movimiento_id'])
             {
-                case "1": // Entrada - Almacen al que entra debe ser mayor a Almacen_actual      
-                    if( ($registro->almacen_id == '0') && (((int)$registro->transito)+1 == (int)$data['almacen_id']) )
-                    {
-                        $mov[0]=[
-                            'almacen_id'=> $data['almacen_id'],
-                            'movimiento_id' => $data['movimiento_id'],
-                            'fecha'=> date('Y-m-d H:i:s'),
-                            'user' => $user->id,
-                        ];
-                        $registro->movimientos()->attach($mov);
-                        
-                        $registro->almacen_id = $data['almacen_id'];
-                        $registro->transito = 0;
-                        $registro->save();
+                case "1": // Entrada - El producto debe tener Almacen_actual = 0 (en transito)
+                    if($registro->almacen_id == '0')
+                    {   // Debe de provenir de almacen-1 o algun almacen mayor a 1
+                        if( (((int)$registro->transito)+1 == (int)$data['almacen_id']) || ((int)$registro->transito > 1) )
+                        { 
+                            $mov[0]=[
+                                'almacen_id'=> $data['almacen_id'],
+                                'movimiento_id' => $data['movimiento_id'],
+                                'fecha'=> date('Y-m-d H:i:s'),
+                                'user' => $user->id,
+                            ];
+                            $registro->movimientos()->attach($mov);
+
+                            $registro->almacen_id = $data['almacen_id'];
+                            $registro->transito = 0;
+                            $registro->save();
                 
-                        $registrado = true;
+                            $registrado = true;
+                        }
                     }
                 break;
-                case "2": // Salida - Almacen del que sale debe ser igual a Almacen_actual
+                case "5": // Baja - Almacen del que sale debe ser igual a Almacen_actual
+                    // *** Hacer que el articulo no se pueda regresar ***
+                case "2": // Salida
+                case "4": // Venta
+                case "6": // Traspaso
                     if( $registro->almacen_id == $data['almacen_id'] )
                     {
                         $mov[0]=[
@@ -78,7 +85,7 @@ class controladorMovimientos extends Controller
                         
                         $registrado = true;  
                     }
-                break;                
+                break; 
             }
         }
         return response()->json($registrado);
