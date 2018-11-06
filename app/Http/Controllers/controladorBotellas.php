@@ -35,9 +35,6 @@ class controladorBotellas extends Controller
         if(!$registro->isEmpty())
         {
             $registro[0]['almacen'] = $registro[0]->almacen;
-            
-
-                
             $registro[0]['mov'] = $registro[0]->movimientoArray;
         }
         return response()->json($registro);
