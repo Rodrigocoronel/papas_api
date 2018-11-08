@@ -15,6 +15,7 @@ class controladorMovimientos extends Controller
         
         $user = $datos->user();
         $data = $datos->input();
+        $tipoDeSalida = 0;
         
         $registrado = false;
         if(Botella::where('folio','=',$data['folio'])->exists())
@@ -45,8 +46,10 @@ class controladorMovimientos extends Controller
                 break;
                 case "5": // Baja - Almacen del que sale debe ser igual a Almacen_actual
                     // *** Hacer que el articulo no se pueda regresar ***
-                case "2": // Salida
+                    $tipoDeSalida = $tipoDeSalida - 1;
                 case "4": // Venta
+                    $tipoDeSalida = $tipoDeSalida - 1;    
+                case "2": // Salida
                 case "6": // Traspaso
                     if( $registro->almacen_id == $data['almacen_id'] )
                     {
@@ -59,7 +62,7 @@ class controladorMovimientos extends Controller
                         $registro->movimientos()->attach($mov);
                         
                         $data['transito'] = $data['almacen_id'];
-                        $data['almacen_id'] = 0;
+                        $data['almacen_id'] = $tipoDeSalida;
                         
                         $registro->almacen_id = $data['almacen_id'];
                         $registro->transito = $data['transito'];
@@ -68,8 +71,9 @@ class controladorMovimientos extends Controller
                         $registrado = true;
                     }
                 break;
-                case "3": // Cancelacion - Almacen_actual debe ser 0, el almacen que al que regresa debe ser el mismo que libero
-                    if( ($registro->almacen_id == 0) && ($registro->transito == $data['almacen_id']) )
+                case "3": // Cancelacion - Almacen_actual debe ser 0 si esta en transito, o -1 si esta vendido,
+                          // y el almacen que al que regresa debe ser el mismo que libero
+                    if( ( $registro->almacen_id == 0 || $registro->almacen_id == -1 ) && ($registro->transito == $data['almacen_id']) )
                     {
                         $mov[0]=[
                             'almacen_id'=> $data['almacen_id'],
@@ -83,9 +87,9 @@ class controladorMovimientos extends Controller
                         $registro->transito = 0;
                         $registro->save();
                         
-                        $registrado = true;  
+                        $registrado = true;
                     }
-                break; 
+                break;
             }
         }
         return response()->json($registrado);

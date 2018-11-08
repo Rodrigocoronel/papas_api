@@ -35,7 +35,9 @@ class controladorBotellas extends Controller
         if(!$registro->isEmpty())
         {
             $registro[0]['almacen'] = $registro[0]->almacen;
-            $registro[0]['mov'] = $registro[0]->movimientoArray;
+            $array=$registro[0]->movimientoArray;
+            usort($array,  function ( $a, $b ) { return strtotime($a['fecha']) - strtotime($b['fecha']); });
+            $registro[0]['mov'] = $array;
         }
         return response()->json($registro);
     }
