@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Almacen extends Model
 {
-    protected $table = 'Almacenes';
+    protected $table = 'almacenes';
     
     // Campos de la tabla que estan disponibles para modificacion
     protected $fillable = [
