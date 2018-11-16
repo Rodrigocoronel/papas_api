@@ -51,7 +51,7 @@ Route::middleware(['auth:api'])->group(function () {
  // Movimientos
 
  Route::get('/Movimientos/{folio}','controladorMovimientos@movimientosPorFolio');        // Buscar movimientos de un folio especifico (botella)
- Route::get('/SalidasPorArea/{area}/{fecha}','controladorMovimientos@salidas');             // Reporte de salidas y traspasos por area y fecha
+ Route::get('/ReporteDeMovimientos/{fecha?}','controladorMovimientos@reportes');             // Reporte de salidas y traspasos por area y fecha
 
  // Todo
  Route::get('Historial/{folio}','Post@');
