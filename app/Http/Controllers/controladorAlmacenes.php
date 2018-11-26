@@ -22,6 +22,22 @@ class controladorAlmacenes extends Controller
         }
         return response()->json($registrado);
     }
+
+    public function cambiarEstado(Request $datos){
+        
+        $user = $datos->user();
+        $data = $datos->input();
+        $realizado  = false;
+
+        $registro = Almacen::where('nombre','=',$data['nombre'])->get();
+        if(!$registro->isEmpty())
+        {
+            $data['activo'] === 1 ? $registro[0]->activo = 0 : $registro[0]->activo = 1;
+            $registro[0]->save();
+            $realizado = true;
+        }
+        return response()->json($realizado);
+    }
     
     public function almacenPorId($id){
         $registro = Almacen::where('id','=',$id)->get();

@@ -12,6 +12,8 @@ class Almacen extends Model
     protected $fillable = [
                 'id',
                 'nombre',
+                'activo',
+                'descripcion'
             ];
 
     // Campos de la tabla no visibles para el usuario

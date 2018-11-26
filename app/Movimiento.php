@@ -21,4 +21,13 @@ class Movimiento extends Model
     // Campos de la tabla no visibles para el usuario
     protected $hidden = [];
 
+    public function almacen()
+    {
+        return $this->belongsTo('App\Almacen', 'almacen_id');
+    }
+
+    public function botella()
+    {
+        return $this->belongsTo('App\Botella', 'botella_id');
+    }
 }

@@ -11,47 +11,41 @@ use Hash;
 
 class UsersController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-
-
-     public function registro(Request $request){
-       
+    public function registro(Request $request)
+    {
         $user = $request->input();
         $user['password'] = bcrypt($user['password']);
         $registro = User::create($user);
-
         return response()->json($this->build_user($registro));
+    }
 
+    public function todosLosUsuarios()
+    {
+        $lista = User::where('id','>',0)->get();
+        return response()->json($lista);
     }
 
 
 
-    
+
+
 
     public function show($id)
     {
-
-            $data = User::find($id);
-            return response()->json($data);
+        $data = User::find($id);
+        return response()->json($data);
     }
-
-  
-
 
     public function build_user($u){
         return [
             'value' => $u->id,
             'label' => $u->name,
-            'correo' => $u->email,];
+            'correo' => $u->email,
+        ];
     }
 
-     public function update(Request $request, $id)
+    public function update(Request $request, $id)
     {
-        //
         $user = $request->input();
         $item = User::find($id);
 
@@ -59,9 +53,8 @@ class UsersController extends Controller
         {
             $user['password'] = bcrypt($user['password']);
         }
-         $item->update($user);
-         return response()->json($this->build_user($item));
-           
+        $item->update($user);
+        return response()->json($this->build_user($item));
     }
 
     public function changePassword(Request $request, $id){

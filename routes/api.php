@@ -25,7 +25,9 @@ Route::middleware(['auth:api'])->group(function () {
     });
 
 	Route::get('/users/{id}' , 'UsersController@show');
-    Route::post('/usuario','UsersController@registro');
+    Route::post('/NuevoUsuario','UsersController@registro');
+    Route::get('/Usuarios', 'UsersController@todosLosUsuarios');
+
     Route::post('/usuario/{id}','UsersController@update');
 	Route::post('/usuario_validar' , 'UsersController@validacion');
 	Route::get('/usuario/busqueda', 'UsersController@busqueda');
@@ -33,25 +35,26 @@ Route::middleware(['auth:api'])->group(function () {
 	Route::put('/password/{id}','UsersController@changePassword');
     
     Route::post('/BotellaNueva','controladorBotellas@registrarBotella');             // Registrar nueva botella
-    Route::post('/AlmacenNuevo','controladorAlmacenes@registrarAlmacen');
+    Route::post('/AlmacenNuevo','controladorAlmacenes@registrarAlmacen');            // Registrar almacen
+    Route::post('/CambiarEstado','controladorAlmacenes@cambiarEstado');              // Cambiar estado de almacen
     Route::post('/MovimientoNuevo','controladorMovimientos@registrarMovimiento');    // Registrar nuevo movimiento
     
  });
 
  // Botellas
- Route::get('/Botella/{folio}','controladorBotellas@botellaPorFolio');                   // Encontrar Por Folio
- Route::get('/Botellas/{insumo}','controladorBotellas@botellaPorCodigoDeInsumo');        // Encontrar Por numero de insumo
- Route::get('/NombreBotellas/{desc}','controladorBotellas@botellasPorNombre');           // Encontrar Por descripcion
- Route::get('/Botellas','controladorBotellas@todasLasBotellas');                         // Listar todas
+ Route::get('/Botella/{folio}','controladorBotellas@botellaPorFolio');               // Encontrar Por Folio
+ Route::get('/Botellas/{insumo}','controladorBotellas@botellaPorCodigoDeInsumo');    // Encontrar Por numero de insumo
+ Route::get('/NombreBotellas/{desc}','controladorBotellas@botellasPorNombre');       // Encontrar Por descripcion
+ Route::get('/Botellas','controladorBotellas@todasLasBotellas');                     // Listar todas
 
  //Almacenes
- Route::get('/Almacen/{id}','controladorAlmacenes@almacenPorId');
- Route::get('/Almacenes','controladorAlmacenes@todosLosAlmacenes');
+ Route::get('/Almacen/{id}','controladorAlmacenes@almacenPorId');                    // Buscar almacen
+ Route::get('/Almacenes','controladorAlmacenes@todosLosAlmacenes');                  // Mostrar todos los almacenes
 
  // Movimientos
 
- Route::get('/Movimientos/{folio}','controladorMovimientos@movimientosPorFolio');        // Buscar movimientos de un folio especifico (botella)
- Route::get('/ReporteDeMovimientos/{fecha?}','controladorMovimientos@reportes');             // Reporte de salidas y traspasos por area y fecha
+ Route::get('/Movimientos/{folio}','controladorMovimientos@movimientosPorFolio');    // Buscar movimientos de un folio especifico (botella)
+ Route::get('/ReporteDeMovimientos/{fecha?}','controladorMovimientos@reportes');     // Reporte de salidas y traspasos por area y fecha
 
  // Todo
  Route::get('Historial/{folio}','Post@');

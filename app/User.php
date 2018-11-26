@@ -16,6 +16,9 @@ class User extends Authenticatable
                 'name',
                 'email',
                 'password',
+                'tarjeta',
+                'area',
+                'tipo',
                 'remember_token'
             ];
 

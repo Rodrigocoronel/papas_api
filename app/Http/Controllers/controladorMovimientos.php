@@ -102,6 +102,7 @@ class controladorMovimientos extends Controller
     
     public function reportes(){
         $lista='';
+        $reporte='';
 
         $fechaInicial = $_GET["fechaInicial"]; $tipo=1;
         if( isset($_GET["fechaFinal"]) ) { $fechaFinal = $_GET["fechaFinal"]; $tipo=$tipo+1; }
@@ -146,6 +147,27 @@ class controladorMovimientos extends Controller
                         ->where('movimiento_id','=',$movimiento)->get();
             break;
         }
-        return response()->json($lista);
+
+        if(!$lista->isEmpty())
+        {
+            $reporte = $lista->transform(function($datos)
+            {
+                return $this->GenerarReporte($datos);
+            });
+        }
+
+        return response()->json($reporte);
     }
+
+    public function GenerarReporte($datos)
+    {
+        return [
+            'fecha' =>         $datos->fecha,
+            'movimiento_id' => $datos->movimiento_id,
+            'botella_id' =>    $datos->botella->folio,
+            'botella_desc' =>  $datos->botella->desc_insumo,
+            'almacen_id' =>    $datos->almacen->nombre,
+        ];
+    }
+
 }
