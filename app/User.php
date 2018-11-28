@@ -19,6 +19,7 @@ class User extends Authenticatable
                 'tarjeta',
                 'area',
                 'tipo',
+                'activo',
                 'remember_token'
             ];
 
