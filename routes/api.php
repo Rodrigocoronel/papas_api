@@ -24,11 +24,15 @@ Route::middleware(['auth:api'])->group(function () {
     	return response()->json([]);
     });
 
-	Route::get('/users/{id}' , 'UsersController@show');
+
     Route::post('/NuevoUsuario','UsersController@registro');
     Route::get('/Usuarios', 'UsersController@todosLosUsuarios');
 
-    Route::post('/usuario/{id}','UsersController@update');
+    Route::post('/Usuario','UsersController@update');
+
+
+    Route::get('/users/{id}' , 'UsersController@show');
+
 	Route::post('/usuario_validar' , 'UsersController@validacion');
 	Route::get('/usuario/busqueda', 'UsersController@busqueda');
 	Route::get('/usuario/conteo', 'UsersController@conteo');

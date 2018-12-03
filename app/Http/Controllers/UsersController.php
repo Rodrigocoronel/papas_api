@@ -25,6 +25,18 @@ class UsersController extends Controller
         return response()->json($lista);
     }
 
+    public function update(Request $request)
+    {
+        $user = $request->input();
+        $item = User::find($user['id']);
+
+        if($user['password'] != $item['password'])
+        {
+            $user['password'] = bcrypt($user['password']);
+        }
+        $item->update($user);
+        return response()->json($this->build_user($item));
+    }
 
 // **********************************************************
 
@@ -44,18 +56,7 @@ class UsersController extends Controller
         ];
     }
 
-    public function update(Request $request, $id)
-    {
-        $user = $request->input();
-        $item = User::find($id);
 
-        if($user['password'] != $item['password'])
-        {
-            $user['password'] = bcrypt($user['password']);
-        }
-        $item->update($user);
-        return response()->json($this->build_user($item));
-    }
 
     public function changePassword(Request $request, $id){
         $data = $request->input();
