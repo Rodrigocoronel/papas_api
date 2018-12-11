@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use Illuminate\Database\Query\Expression as Expression;
 
 use App\User;
-use App\Departamento;
 use Hash;
 
 class UsersController extends Controller
@@ -22,6 +21,10 @@ class UsersController extends Controller
     public function todosLosUsuarios()
     {
         $lista = User::where('id','>',0)->get();
+        if(!$lista->isEmpty())
+        {
+            $lista[0]['almacen'] = $lista[0]->almacen;
+        }
         return response()->json($lista);
     }
 
@@ -38,25 +41,15 @@ class UsersController extends Controller
         return response()->json($this->build_user($item));
     }
 
-// **********************************************************
-
-
-
-    public function show($id)
+    public function tarjeta(Request $request)
     {
-        $data = User::find($id);
-        return response()->json($data);
+        $tarjeta = $request->input();
+        return response()->json($tarjeta);
+        //$usuario = User::find($tarjeta);
+
     }
 
-    public function build_user($u){
-        return [
-            'value' => $u->id,
-            'label' => $u->name,
-            'correo' => $u->email,
-        ];
-    }
-
-
+// **********************************************************
 
     public function changePassword(Request $request, $id){
         $data = $request->input();
@@ -69,54 +62,7 @@ class UsersController extends Controller
         }else{
             $ret = false;
         }
-
-
         return response()->json($ret);
     }
 
-    public function validacion(Request $request)
-    {
-       $back=true;
-       $data = $request->input();
-       $encontrados = User::where("email","=",$data['email'])->get(); 
-       $cuenta=0;
-         foreach ($encontrados as $x) {
-             $cuenta++;              
-            }
-            if((int)$cuenta>0)
-            $back=false; 
-
-       return response()->json(['validacion'=>$back,'encontrado'=>$encontrados]);
-    }
-
-    public function busqueda() {
-        $list = User::lista([
-            'value'    => isset($_GET["value"]) ? $_GET["value"] : null,
-            'label'     => isset($_GET["label"]) ? $_GET["label"] : null,
-            'departamento'     => isset($_GET["departamento"]) ? $_GET["departamento"] : null, 
-            'take'     => isset($_GET["take"]) ? $_GET["take"] : null,                     
-            'skip'    => isset($_GET["skip"]) ? $_GET["skip"] : null,
-        ])->get();
-
-         $output = $list->transform(function($item){
-            return $this->build_user($item);
-        });
-
-        return response()->json($output);
-    }
-    public function conteo() {      
-        $list =0;  
-        $list = User::listaConteo([ 
-
-            'value'    => isset($_GET["value"]) ? $_GET["value"] : null,
-            'label'     => isset($_GET["label"]) ? $_GET["label"] : null,
-            'departamento'     => isset($_GET["departamento"]) ? $_GET["departamento"] : null, 
-           
-          ])->get();
-
-
-         return response()->json($list);  
-              
-
-    }
 }

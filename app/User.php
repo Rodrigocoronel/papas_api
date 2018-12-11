@@ -25,5 +25,10 @@ class User extends Authenticatable
 
     // Campos de la tabla no visibles para el usuario
     protected $hidden = [];
+
+    public function almacen()
+    {
+        return $this->belongsTo('App\Almacen', 'area');
+    }
     
 }
