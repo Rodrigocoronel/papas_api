@@ -15,6 +15,7 @@ class controladorMovimientos extends Controller
         
         $user = $datos->user();
         $data = $datos->input();
+        $dato = ['temp'=>1];
         $tipoDeSalida = 0;
         
         $registrado = false;
@@ -41,6 +42,12 @@ class controladorMovimientos extends Controller
                             $registro->save();
                 
                             $registrado = true;
+                            
+                            $dato=[
+                                'folio' => $data['folio'],
+                                'movimiento_id' => $data['movimiento_id'],
+                                'desc_insumo' => $registro['desc_insumo'],
+                            ];
                         }
                     }
                 break;
@@ -69,6 +76,11 @@ class controladorMovimientos extends Controller
                         $registro->save();
 
                         $registrado = true;
+                        $dato=[
+                            'folio' =>$data['folio'],
+                            'movimiento_id' => $data['movimiento_id'],
+                            'desc_insumo' => $registro['desc_insumo'],
+                        ];
                     }
                 break;
                 case "3": // Cancelacion - Almacen_actual debe ser 0 si esta en transito, o -1 si esta vendido,
@@ -88,11 +100,16 @@ class controladorMovimientos extends Controller
                         $registro->save();
                         
                         $registrado = true;
+                        $dato=[
+                            'folio' =>$registro->folio,
+                            'movimiento_id' => (string)$registro->movimiento_id,
+                            'desc_insumo' => $registro['desc_insumo'],
+                        ];
                     }
                 break;
             }
         }
-        return response()->json($registrado);
+        return response()->json(['registrado' => $registrado, 'movimiento' => $dato ]);
     }
     
     public function movimientosPorFolio($folio){
