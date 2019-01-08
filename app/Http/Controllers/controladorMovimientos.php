@@ -26,29 +26,26 @@ class controladorMovimientos extends Controller
             {
                 case "1": // Entrada - El producto debe tener Almacen_actual = 0 (en transito)
                     if($registro->almacen_id == '0')
-                    {   // Debe de provenir de almacen-1 o algun almacen mayor a 1
-                        if( (((int)$registro->transito)+1 == (int)$data['almacen_id']) || ((int)$registro->transito > 1) )
-                        { 
-                            $mov[0]=[
-                                'almacen_id'=> $data['almacen_id'],
-                                'movimiento_id' => $data['movimiento_id'],
-                                'fecha'=> date('Y-m-d H:i:s'),
-                                'user' => $user->id,
-                            ];
-                            $registro->movimientos()->attach($mov);
+                    {
+                        $mov[0]=[
+                            'almacen_id'=> $data['almacen_id'],
+                            'movimiento_id' => $data['movimiento_id'],
+                            'fecha'=> date('Y-m-d H:i:s'),
+                            'user' => $user->id,
+                        ];
+                        $registro->movimientos()->attach($mov);
 
-                            $registro->almacen_id = $data['almacen_id'];
-                            $registro->transito = 0;
-                            $registro->save();
-                
-                            $registrado = true;
-                            
-                            $dato=[
-                                'folio' => $data['folio'],
-                                'movimiento_id' => $data['movimiento_id'],
-                                'desc_insumo' => $registro['desc_insumo'],
-                            ];
-                        }
+                        $registro->almacen_id = $data['almacen_id'];
+                        $registro->transito = 0;
+                        $registro->save();
+            
+                        $registrado = true;
+                        
+                        $dato=[
+                            'folio' => $data['folio'],
+                            'movimiento_id' => $data['movimiento_id'],
+                            'desc_insumo' => $registro['desc_insumo'],
+                        ];
                     }
                 break;
                 case "5": // Baja - Almacen del que sale debe ser igual a Almacen_actual
