@@ -39,4 +39,4 @@ Route::middleware(['auth:api'])->group(function ()
 	Route::get( '/ReporteDeMovimientos/{fecha?}','controladorMovimientos@reportes');             // Reportes de salidas y traspasos
 });
     
-Route::get('/Tarjeta','UsersController@tarjeta');   // Busqueda de numero de tarjeta para login con tarjeta RFID
+Route::post('/logincard','UsersController@login');   // Busqueda de numero de tarjeta para login con tarjeta RFID
