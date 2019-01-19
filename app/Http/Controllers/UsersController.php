@@ -7,9 +7,13 @@ use Illuminate\Database\Query\Expression as Expression;
 
 use App\User;
 use Hash;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class UsersController extends Controller
 {
+
+
     public function registro(Request $request)
     {
         $user = $request->input();
@@ -49,6 +53,14 @@ class UsersController extends Controller
 
     }
 
+    public function build_user($u){
+        return [
+            'value' => $u->id,
+            'label' => $u->name,
+            'correo' => $u->email,
+        ];
+    }
+
 // **********************************************************
 
     public function changePassword(Request $request, $id){
@@ -67,18 +79,22 @@ class UsersController extends Controller
 
     public function login(Request $request)
     {
-        $request->validate([
-            'target'       => 'required|string',
+
+        $this->validate($request, [
+            'password'       => 'required|string',
         ]);
 
-        $credentials = request(['target']);
+        $data = $request->input();
 
-        if (!Auth::attempt($credentials)) {
+        $credentials = request(['password']);
+        
+        $user = User::where('tarjeta','=',$data['password'])->first();
+        if (!$user) {
             return response()->json([
                 'message' => 'Unauthorized'], 401);
         }
         
-        $user = $request->user();
+        // $user = $request->user();
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->token;
         if ($request->remember_me) {
