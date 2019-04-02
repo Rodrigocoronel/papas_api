@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Database\Query\Expression as Expression;
+use PDF;
 
 use App\Movimiento;
 use App\Botella;
@@ -182,6 +183,32 @@ class controladorMovimientos extends Controller
             'botella_desc' =>  $datos->botella->desc_insumo,
             'almacen_id' =>    $datos->almacen->nombre,
         ];
+    }
+
+    public function generarReporteDeTraspaso()
+    {
+        $Area = [];
+        $Concentrado = [];
+        $pdf = PDF::loadView('pdf.traspaso', ['area'=>$Area, 'movimiento'=> $Concentrado] );
+        $pdf->setPaper('letter');
+        $pdf->output();
+        $dom_pdf = $pdf->getDomPDF();
+        $canvas = $dom_pdf ->get_canvas();
+        $canvas->page_text(25, 760, "WeNatives 2019.", null, 10, array(0, 0, 0));
+        return $pdf->stream("Movimientos.pdf");
+    }
+
+    public function imprimirReporteDeBusqueda()
+    {
+        $Concentrado = [];
+        $pdf = PDF::loadView('pdf.reporte', ['movimiento'=> $Concentrado] );
+        $pdf->setPaper('letter');
+        $pdf->output();
+        $dom_pdf = $pdf->getDomPDF();
+        $canvas = $dom_pdf ->get_canvas();
+        $canvas->page_text(25, 760, "WeNatives 2019.", null, 10, array(0, 0, 0));
+        $canvas->page_text(520, 760, "Página {PAGE_NUM} de {PAGE_COUNT}", null, 10, array(0, 0, 0));
+        return $pdf->stream("Movimientos.pdf");
     }
 
 }
