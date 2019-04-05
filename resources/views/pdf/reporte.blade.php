@@ -13,6 +13,8 @@
 			}
 			.der { text-align: right; }
 			.cen { text-align: center; }
+			.lt12 { font-size: 12px; }
+			.lt14 { font-size: 14px; }
 
 		</style>
 	</head>
@@ -20,10 +22,10 @@
 	<body>
 		<?php 
 			$a = array(1=>"1", 2=>"2", 3=>"3", 4=>"4", 5=>"5");
-			$fecha1 = "- - - - -";
-			$fecha2 = "- - - - -";
-			$area = "- - - - -";
-			$movimiento = "- - - - -";
+			if($fecha1 == "")     $fecha1 =     "- - - - - - -";
+			if($fecha2 == "")     $fecha2 =     "- - - - - - -";
+			if($area == "")       $area =       "- - - - - - -";
+			if($movimiento == "") $movimiento = "- - - - - - -";
 		?>
 
 		<table class="header">
@@ -37,7 +39,7 @@
 				</td>
 				<td width=40%> </td>
 				<td class="der" width=25%>
-					<b> Fecha: </b> <i> 25/12/2009 </i>
+					<b> Fecha: </b> <i> Poner Fecha del dia </i>
 				</td>
 			</tr>
 		</table>
@@ -55,25 +57,35 @@
 		<hr>
 		<table class="reporte">
 			<tr>
-				<th class="cen" width=5%> No. </th>
-				<th class="cen" width=15%> Fecha: </th>
-				<th width=15%> Movimiento </th>
-				<th width=15%> Codigo </th>
-				<th width=30%> Producto </th>
-				<th width=20%> Area </th>
+				<th class="lt12 cen" width=8%> NO. </th>
+				<th class="lt12 cen" width=15%> FECHA/HORA </th>
+				<th class="lt12 cen" width=15%> MOVIMIENTO </th>
+				<th class="lt12 cen" width=10%> CODIGO </th>
+				<th class="lt12 cen" width=37%> PRODUCTO </th>
+				<th class="lt12 cen" width=15%> AREA </th>
 			</tr>
-
-			@foreach($a as $x)
+			@foreach($movimientos as $x => $y)
 				<tr>
-					<td class="cen" > {{ $x }} </td>
-					<td class="cen" > {{ $x }} </td>
-					<td > {{ $x }} </td>
-					<td > {{ $x }} </td>
-					<td > {{ $x }} </td>
-					<td > {{ $x }} </td>
+					<td class="lt12 cen"> {{ $x + 1              }} </td>
+					<td class="lt12 cen"> {{ $y['fecha']         }} </td>
+					<td class="lt12 cen">
+						<?php
+							switch($y['movimiento_id'])
+							{
+								case 1: echo "Entrada"; break;
+								case 2: echo "Salida"; break;
+						        case 3: echo "Cancenlación"; break;
+						        case 4: echo "Venta"; break;
+						        case 5: echo "Baja"; break;
+								case 6: echo "Traspaso"; break;
+     						} 
+     					?>					 
+					</td>
+					<td class="lt12 cen"> {{ $y['botella_id']    }} </td>
+					<td class="lt12">     {{ $y['botella_desc']  }} </td>
+					<td class="lt12 cen"> {{ $y['almacen_id']    }} </td>
 				</tr>
 			@endforeach
-
 		</table>
 		<hr>
 		

@@ -200,8 +200,59 @@ class controladorMovimientos extends Controller
 
     public function imprimirReporteDeBusqueda()
     {
-        $Concentrado = [];
-        $pdf = PDF::loadView('pdf.reporte', ['movimiento'=> $Concentrado] );
+
+        $lista='';
+        $reporte='';
+
+        $fechaFinal=NULL;
+        $almacen=NULL;
+        $movimiento=NULL;
+        
+        $fechaInicial = $_GET["fechaInicial"]; $tipo=1;
+        if( isset($_GET["fechaFinal"]) ) { $fechaFinal = $_GET["fechaFinal"]; $tipo=$tipo+1; }
+        if( isset($_GET["almacen"]) )    { $almacen    = $_GET["almacen"];    $tipo=$tipo+2; }
+        if( isset($_GET["movimiento"]) ) { $movimiento = $_GET["movimiento"]; $tipo=$tipo+4; }
+
+        switch($tipo){
+            case 1: // Fecha inicial
+                $lista = Movimiento::where('fecha','like',$fechaInicial.'%')->get();
+            break;
+            case 2: // Fecha inicial, Fecha final
+                $lista = Movimiento::whereDate('fecha','>=',$fechaInicial)
+                        ->whereDate('fecha','<=',$fechaFinal)->get();
+            break;
+            case 3: // Fecha inicial, Almacen
+                $lista = Movimiento::where('fecha','like',$fechaInicial.'%')
+                        ->where('almacen_id','=',$almacen)->get();
+            break;
+            case 4: // Fecha inicial, Fecha final, Almacen
+                 $lista = Movimiento::whereDate('fecha','>=',$fechaInicial)
+                        ->whereDate('fecha','<=',$fechaFinal)
+                        ->where('almacen_id','=',$almacen)->get();
+            break;
+            case 5: // Fecha inicial, movimiento
+                $lista = Movimiento::where('fecha','like',$fechaInicial.'%')
+                ->where('movimiento_id','=',$movimiento)->get();
+            break;
+            case 6: // Fecha inicial, Fecha final, Movimiento 
+                 $lista = Movimiento::whereDate('fecha','>=',$fechaInicial)
+                        ->whereDate('fecha','<=',$fechaFinal)
+                        ->where('movimiento_id','=',$movimiento)->get();
+            break;
+            case 7: // Fecha inicial, almacen, movimiento
+                $lista = Movimiento::where('fecha','like',$fechaInicial.'%')
+                        ->where('almacen_id','=',$almacen)
+                        ->where('movimiento_id','=',$movimiento)->get();
+            break;
+            case 8: // Fecha inicial, Fecha final, almacen, movimiento
+                $lista = Movimiento::whereDate('fecha','>=',$fechaInicial)
+                        ->whereDate('fecha','<=',$fechaFinal)
+                        ->where('almacen_id','=',$almacen)
+                        ->where('movimiento_id','=',$movimiento)->get();
+            break;
+        }
+        $reporte = $lista->transform( function($datos) { return $this->GenerarReporte($datos); } );
+        $pdf = PDF::loadView('pdf.reporte', ['fecha1'=>$fechaInicial, 'fecha2'=>$fechaFinal, 'area'=>$almacen, 'movimiento'=>$movimiento, 'movimientos'=> $reporte] );
         $pdf->setPaper('letter');
         $pdf->output();
         $dom_pdf = $pdf->getDomPDF();
