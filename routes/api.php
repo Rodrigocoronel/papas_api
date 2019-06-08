@@ -19,6 +19,8 @@ Route::middleware(['auth:api'])->group(function ()
 	Route::post('/NuevoUsuario','UsersController@registro');                                     // Registrar un nuevo usuario
 	Route::get( '/Usuarios',    'UsersController@todosLosUsuarios');                             // Reporte de usuarios
 	Route::post('/Usuario',     'UsersController@update');                                       // Actualizar datos de un usuario
+	Route::get('/user_by_id/{id}' , 'UsersController@get_user_id');
+
 
 	// Botellas
 	Route::post('/BotellaNueva',         'controladorBotellas@registrarBotella');                // Registrar nueva botella

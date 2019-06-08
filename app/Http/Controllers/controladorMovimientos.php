@@ -9,6 +9,7 @@ use PDF;
 
 use App\Movimiento;
 use App\Botella;
+use App\User;
 
 class controladorMovimientos extends Controller
 {
@@ -18,6 +19,8 @@ class controladorMovimientos extends Controller
         $data = $datos->input();
         $dato = ['temp'=>1];
         $tipoDeSalida = 0;
+
+        
         
         $registrado = false;
         if(Botella::where('folio','=',$data['folio'])->exists())
@@ -51,7 +54,40 @@ class controladorMovimientos extends Controller
                 break;
                 case "5": // Baja - Almacen del que sale debe ser igual a Almacen_actual
                     // *** Hacer que el articulo no se pueda regresar ***
-                    $tipoDeSalida = $tipoDeSalida - 1;
+                    $tipoDeSalida = $tipoDeSalida - 2;
+                    
+                    $admin_user = User::where('tarjeta','=',$data['tarjeta'])->first();
+
+                    if(!empty($admin_user)){
+                        if($admin_user->tipo == 3){
+                            if( $registro->almacen_id == $data['almacen_id'] ){
+                                $mov[0]=[
+                                    'almacen_id'=> $data['almacen_id'],
+                                    'movimiento_id' => $data['movimiento_id'],
+                                    'fecha'=> date('Y-m-d H:i:s'),
+                                    'user' => $user->id,
+                                ];
+                                $registro->movimientos()->attach($mov);
+                                
+                                $data['transito'] = $data['almacen_id'];
+                                $data['almacen_id'] = $tipoDeSalida;
+                                
+                                $registro->almacen_id = $data['almacen_id'];
+                                $registro->transito = $data['transito'];
+                                $registro->save();
+
+                                $registrado = true;
+                                $dato=[
+                                    'folio' =>$data['folio'],
+                                    'movimiento_id' => $data['movimiento_id'],
+                                    'desc_insumo' => $registro['desc_insumo'],
+                                ];
+                            }
+                        }
+
+                    }
+                   
+                    break;
                 case "4": // Venta
                     $tipoDeSalida = $tipoDeSalida - 1;    
                 case "2": // Salida
@@ -83,26 +119,32 @@ class controladorMovimientos extends Controller
                 break;
                 case "3": // Cancelacion - Almacen_actual debe ser 0 si esta en transito, o -1 si esta vendido,
                           // y el almacen que al que regresa debe ser el mismo que libero
-                    if( ( $registro->almacen_id == 0 || $registro->almacen_id == -1 ) && ($registro->transito == $data['almacen_id']) )
-                    {
-                        $mov[0]=[
-                            'almacen_id'=> $data['almacen_id'],
-                            'movimiento_id' => $data['movimiento_id'],
-                            'fecha'=> date('Y-m-d H:i:s'),
-                            'user' => $user->id,
-                        ];
-                        $registro->movimientos()->attach($mov);
-                        
-                        $registro->almacen_id = $data['almacen_id'];
-                        $registro->transito = 0;
-                        $registro->save();
-                        
-                        $registrado = true;
-                        $dato=[
-                            'folio' =>$registro->folio,
-                            'movimiento_id' => (string)$registro->movimiento_id,
-                            'desc_insumo' => $registro['desc_insumo'],
-                        ];
+                    $admin_user = User::where('tarjeta','=',$data['tarjeta'])->first();
+
+                    if(!empty($admin_user)){
+                        if($admin_user->tipo == 3){
+                            if( ( $registro->almacen_id == 0 || $registro->almacen_id == -1 ) && ($registro->transito == $data['almacen_id']) )
+                            {
+                                $mov[0]=[
+                                    'almacen_id'=> $data['almacen_id'],
+                                    'movimiento_id' => $data['movimiento_id'],
+                                    'fecha'=> date('Y-m-d H:i:s'),
+                                    'user' => $user->id,
+                                ];
+                                $registro->movimientos()->attach($mov);
+                                
+                                $registro->almacen_id = $data['almacen_id'];
+                                $registro->transito = 0;
+                                $registro->save();
+                                
+                                $registrado = true;
+                                $dato=[
+                                    'folio' =>$registro->folio,
+                                    'movimiento_id' => $registro->movimiento_id,
+                                    'desc_insumo' => $registro['desc_insumo'],
+                                ];
+                            }
+                        }
                     }
                 break;
             }

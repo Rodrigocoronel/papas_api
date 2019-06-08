@@ -39,7 +39,7 @@
 				</td>
 				<td width=40%> </td>
 				<td class="der" width=25%>
-					<b> Fecha: </b> <i> Poner Fecha del dia </i>
+					<b> Fecha: </b> <i> <?php echo date('Y-m-d H:i:s') ?> </i>
 				</td>
 			</tr>
 		</table>

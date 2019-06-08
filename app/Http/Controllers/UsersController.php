@@ -32,6 +32,14 @@ class UsersController extends Controller
         return response()->json($lista);
     }
 
+    public function get_user_id($id){
+        
+        $output = User::find($id);
+
+        return response()->json($output);
+    }
+
+
     public function update(Request $request)
     {
         $user = $request->input();
