@@ -39,9 +39,14 @@ Route::middleware(['auth:api'])->group(function ()
 	Route::post('/MovimientoNuevo',              'controladorMovimientos@registrarMovimiento');  // Registrar nuevo movimiento
 	Route::get( '/Movimientos/{folio}',          'controladorMovimientos@movimientosPorFolio');  // Buscar movimientos de un folio especifico
 	Route::get( '/ReporteDeMovimientos/{fecha?}','controladorMovimientos@reportes');             // Reportes de salidas y traspasos
+
+	//traspasos
+
+	Route::post('/nuevo_traspaso', 'TraspasosController@create');
+	Route::get('/last_traspaso', 'TraspasosController@lastRecord');
 });
     
 Route::post('/logincard','UsersController@login');   											 // Busqueda de numero de tarjeta para login con tarjeta RFID
-Route::get('/reporteDeTraspaso','controladorMovimientos@generarReporteDeTraspaso'); 			 // Pfd para reporte de traspasos
+Route::get('/reporteDeTraspaso/{traspaso}','controladorMovimientos@generarReporteDeTraspaso'); 			 // Pfd para reporte de traspasos
 //Route::get('/reporteDeBusqueda','controladorMovimientos@imprimirReporteDeBusqueda'); 			 // Pfd para reporte de traspasos
 Route::get('/reporte_de_busqueda','controladorMovimientos@imprimirReporteDeBusqueda'); 			 // Pfd para reporte de busquedas

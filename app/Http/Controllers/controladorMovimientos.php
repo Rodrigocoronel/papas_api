@@ -9,6 +9,7 @@ use PDF;
 
 use App\Movimiento;
 use App\Botella;
+use App\Traspaso;
 use App\User;
 
 class controladorMovimientos extends Controller
@@ -97,9 +98,7 @@ class controladorMovimientos extends Controller
                    
                     break;
                 case "4": // Venta
-                    $tipoDeSalida = $tipoDeSalida - 1;    
-                case "2": // Salida
-
+                    $tipoDeSalida = $tipoDeSalida - 1;   
                     if( $registro->almacen_id == $data['almacen_id'] )
                     {
                         $mov[0]=[
@@ -122,6 +121,40 @@ class controladorMovimientos extends Controller
                             'folio' =>$data['folio'],
                             'movimiento_id' => $data['movimiento_id'],
                             'desc_insumo' => $registro['desc_insumo'],
+                        ];
+                    }
+                    break; 
+                case "2": // Salida
+
+                    if( $registro->almacen_id == $data['almacen_id'] )
+                    {
+                        $mov[0]=[
+                            'almacen_id'=> $data['almacen_id'],
+                            'movimiento_id' => $data['movimiento_id'],
+                            'fecha'=> date('Y-m-d H:i:s'),
+                            'trasp_id' => $data['trasp_id'],
+                            'user' => $user->id,
+                        ];
+
+                        $registro->movimientos()->attach($mov);
+                        
+                        $data['transito'] = $data['almacen_id'];
+                        $data['almacen_id'] = $tipoDeSalida;
+                        
+                        $registro->almacen_id = $data['almacen_id'];
+                        $registro->transito = $data['transito'];
+                        $registro->save();
+
+                        $registrado = true;
+
+                        $lista = Movimiento::lista(['id' => $data['trasp_id'] ])->get();
+                        $tras = Traspaso::find($data['trasp_id']);
+                        $dato=[
+                            'id' => $registro->id,
+                            'recibe' => $tras->recibe,
+                            'movimientos' => $lista,
+                            'movimientos_detallados' => $tras->ItemsArray,
+                            'edit' => $tras->edit,
                         ];
                     }
 
@@ -270,11 +303,13 @@ class controladorMovimientos extends Controller
         ];
     }
 
-    public function generarReporteDeTraspaso()
+    public function generarReporteDeTraspaso($traspaso)
     {
+        $data = Movimiento::lista(['id' => $traspaso])->get();
+        $dataTraspaso = Traspaso::find($traspaso);
         $Area = [];
         $Concentrado = [];
-        $pdf = PDF::loadView('pdf.traspaso', ['area'=>$Area, 'movimiento'=> $Concentrado] );
+        $pdf = PDF::loadView('pdf.traspaso', ['data'=>$data, 'dataTraspaso' => $dataTraspaso] );
         $pdf->setPaper('letter');
         $pdf->output();
         $dom_pdf = $pdf->getDomPDF();

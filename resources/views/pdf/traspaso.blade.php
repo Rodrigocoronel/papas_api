@@ -33,16 +33,10 @@
 	</head>
 
 	<body>
-		<?php 
-			$a = array(1=>"00001", 2=>"00002", 3=>"00003", 4=>"00004", 5=>"00005");
-			$almacen1 = "Almacen General";
-			$almacen2 = "Almacen De Licor";
-			$almacenista1 = "Pablo Marmol";
-			$almacenista2 = "Pedro Picapiedra";
-		?>
+
 
 		<table class="header">
-			<img src="../storage/app/images/logob.jpg" width=100; height=25; />
+			<img src="../storage/app/images/papaslogo.png" width=100; height=25; />
 		</table>
 		<br> <br>
 		<table class="general" >
@@ -52,7 +46,7 @@
 				</td>
 				<td width=40%> </td>
 				<td class="der" width=25%>
-					<b> Fecha: </b> <i> 25/12/2009 </i>
+					<b> Fecha: </b> <i> {{$dataTraspaso['created_at']}}</i>
 				</td>
 			</tr>
 		</table>
@@ -60,29 +54,22 @@
 		<table class="general">
 			<tr>
 				<td width=18%> <b> Area De Salida: </b> </td>
-				<td>  Almacen 1 </td>
+				<td>  {{ $dataTraspaso->user_rel->almacen->nombre }} </td>
 
-			</tr>
-			<tr>
-				<td> <b> Area De Salida: </b> </td>
-				<td> Almacen 2 </td>
 			</tr>
 		</table>
 		<hr>
 		<table class="reporte">
 			<tr>
-				<th class="cen" width=10%> No. </th>
-				<th class="cen" width=15%> Folio </th>
+				<th class="cen" width=10%> Cantidad </th>
 				<th width=20%> Movimiento </th>
 				<th width=45%> Descripción </th>
 			</tr>
-
-			@foreach($a as $x)
+			@foreach($data as $datos => $value)
 				<tr>
-					<td class="cen" width=10%> {{ $x }} </td>
-					<td class="cen" width=20%> {{ $x }} </td>
-					<td width=20%> {{ $x }} </td>
-					<td width=50%> {{ $x }} </td>
+					<td class="cen" width=10%> {{$value['qty']}} </td>
+					<td width=20%> {{$value['movimiento_id']}} </td>
+					<td width=50%> {{$value['descs']}} </td>
 				</tr>
 			@endforeach
 
@@ -105,16 +92,16 @@
 			</tr>
 			<tr class="cen">
 				<td width=13%> </td>
-				<td width=29%> {{ $almacen1 }} </td>
+				<td width=29%>  </td>
 				<td width=16%> </td>
-				<td width=29%> {{ $almacen2 }} </td>
+				<td width=29%>  </td>
 				<td width=13%> </td>
 			</tr>
 			<tr class="cen">
 				<td width=13%> </td>
-				<td width=29%> {{ $almacenista1 }} </td>
+				<td width=29%> </td>
 				<td width=16%> </td>
-				<td width=29%> {{ $almacenista2 }} </td>
+				<td width=29%> </td>
 				<td width=13%> </td>
 			</tr>
 		</table>
