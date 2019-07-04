@@ -24,12 +24,27 @@ class UsersController extends Controller
 
     public function todosLosUsuarios()
     {
-        $lista = User::where('id','>',0)->get();
-        if(!$lista->isEmpty())
-        {
-            $lista[0]['almacen'] = $lista[0]->almacen;
-        }
-        return response()->json($lista);
+        $lista = User::all();
+
+        $output = [];
+
+        $output = $lista->transform(function($item){
+            return $this->build_to_list($item);
+        });
+        
+        return response()->json($output);
+    }
+
+    public function build_to_list($item)
+    {
+        return[
+            'activo' => $item->activo,
+            'name' => $item->name,
+            'email' => $item->email,
+            'area' => $item->almacen->nombre,
+            'id' => $item->id,
+            'tipo' => $item->TipoText
+        ];
     }
 
     public function get_user_id($id){

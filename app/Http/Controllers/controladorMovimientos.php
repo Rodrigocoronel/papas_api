@@ -161,37 +161,31 @@ class controladorMovimientos extends Controller
                     break;
                 case "6": // Traspaso
 
-                    $admin_user = User::where('tarjeta','=',$data['tarjeta'])->first();
+                    if( $registro->almacen_id == $data['almacen_id'] )
+                    {
+                        $mov[0]=[
+                            'almacen_id'=> $data['almacen_id'],
+                            'movimiento_id' => $data['movimiento_id'],
+                            'fecha'=> date('Y-m-d H:i:s'),
+                            'user' => $user->id,
+                        ];
+                        $registro->movimientos()->attach($mov);
+                        
+                        $data['transito'] = $data['almacen_id'];
+                        $data['almacen_id'] = $tipoDeSalida;
+                        
+                        $registro->almacen_id = $data['almacen_id'];
+                        $registro->transito = $data['transito'];
+                        $registro->save();
 
-                    if(!empty($admin_user)){
-                        if($admin_user->tipo == 3){
-                            if( $registro->almacen_id == $data['almacen_id'] )
-                            {
-                                $mov[0]=[
-                                    'almacen_id'=> $data['almacen_id'],
-                                    'movimiento_id' => $data['movimiento_id'],
-                                    'fecha'=> date('Y-m-d H:i:s'),
-                                    'user' => $user->id,
-                                ];
-                                $registro->movimientos()->attach($mov);
-                                
-                                $data['transito'] = $data['almacen_id'];
-                                $data['almacen_id'] = $tipoDeSalida;
-                                
-                                $registro->almacen_id = $data['almacen_id'];
-                                $registro->transito = $data['transito'];
-                                $registro->save();
-
-                                $registrado = true;
-                                $dato=[
-                                    'folio' =>$data['folio'],
-                                    'movimiento_id' => $data['movimiento_id'],
-                                    'desc_insumo' => $registro['desc_insumo'],
-                                ];
-                            }
-                        }
+                        $registrado = true;
+                        $dato=[
+                            'folio' =>$data['folio'],
+                            'movimiento_id' => $data['movimiento_id'],
+                            'desc_insumo' => $registro['desc_insumo'],
+                        ];
                     }
-                    
+
                 break;
                 case "3": // Cancelacion - Almacen_actual debe ser 0 si esta en transito, o -1 si esta vendido,
                           // y el almacen que al que regresa debe ser el mismo que libero
@@ -307,8 +301,11 @@ class controladorMovimientos extends Controller
     {
         $data = Movimiento::lista(['id' => $traspaso])->get();
         $dataTraspaso = Traspaso::find($traspaso);
-        $Area = [];
-        $Concentrado = [];
+
+        $dataTraspaso->edit = 0;
+
+        $dataTraspaso->save();
+
         $pdf = PDF::loadView('pdf.traspaso', ['data'=>$data, 'dataTraspaso' => $dataTraspaso] );
         $pdf->setPaper('letter');
         $pdf->output();

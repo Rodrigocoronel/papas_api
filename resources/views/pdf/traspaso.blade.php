@@ -34,6 +34,7 @@
 
 	<body>
 
+		<?php $movimientos = array(1 => "Entrada" , 2 => "Salida", 3 => "Cancenlación", 4 => "Venta", 5 => "Baja", 6 => "Traspaso"); ?>
 
 		<table class="header">
 			<img src="../storage/app/images/papaslogo.png" width=100; height=25; />
@@ -42,7 +43,7 @@
 		<table class="general" >
 			<tr>
 				<td width=35%>
-					<b> Reporte De Traspaso De Botellas </b>
+					<b> Reporte De Traspaso De Botellas #{{$dataTraspaso->id}}</b>
 				</td>
 				<td width=40%> </td>
 				<td class="der" width=25%>
@@ -68,7 +69,7 @@
 			@foreach($data as $datos => $value)
 				<tr>
 					<td class="cen" width=10%> {{$value['qty']}} </td>
-					<td width=20%> {{$value['movimiento_id']}} </td>
+					<td width=20%> {{ $movimientos[ $value['movimiento_id'] ] }} </td>
 					<td width=50%> {{$value['descs']}} </td>
 				</tr>
 			@endforeach
@@ -85,25 +86,19 @@
 			</tr>
 			<tr class="cen">
 				<td width=13%> </td>
-				<td width=29%> <b> ENTREGO </b> </td>
+				<td width=29%> <span style="font-size: 12px;"> ({{ $dataTraspaso->user_rel->name }}) </span>  </td>
 				<td width=16%> </td>
-				<td width=29%> <b> RECIBIO </b> </td>
+				<td width=29%> <span style="font-size: 12px;"> ({{$dataTraspaso->recibe}}) </span> </td>
 				<td width=13%> </td>
 			</tr>
 			<tr class="cen">
 				<td width=13%> </td>
-				<td width=29%>  </td>
+				<td width=29%> <b> ENTREGA </b> </td>
 				<td width=16%> </td>
-				<td width=29%>  </td>
+				<td width=29%> <b> RECIBE </b> </td>
 				<td width=13%> </td>
 			</tr>
-			<tr class="cen">
-				<td width=13%> </td>
-				<td width=29%> </td>
-				<td width=16%> </td>
-				<td width=29%> </td>
-				<td width=13%> </td>
-			</tr>
+			
 		</table>
 		
 	</body>

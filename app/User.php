@@ -26,9 +26,21 @@ class User extends Authenticatable
     // Campos de la tabla no visibles para el usuario
     protected $hidden = [];
 
+    protected $tipos = [
+        1 => 'Administrador',
+        3 => 'Gerente',
+        4 => 'Almacenista (General)',
+        5 => 'Almacenista (Licores)',
+        6 => 'Barra'
+    ];
+
+    public function getTipoTextAttribute(){
+        return $this->tipos[$this->tipo];
+    }
+
     public function almacen()
     {
-        return $this->belongsTo('App\Almacen', 'area');
+        return $this->belongsTo('App\Almacen', 'area' , 'id');
     }
 
     

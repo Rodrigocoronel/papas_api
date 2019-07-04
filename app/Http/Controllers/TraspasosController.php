@@ -18,29 +18,55 @@ class TraspasosController extends Controller
 
         $user = $request->user();
 
+        $error = false;
+        $new = [];
+
         $lastRecod = Traspaso::where('user','=',$user->id)->orderBy('id', 'DESC')->first();
 
         $data['user'] = $user->id;
         $data['edit'] = 1;
 
-        count($lastRecod->ItemsArray){
+        if($lastRecod){
+            if( count($lastRecod->ItemsArray) > 0 ){
+                $new = Traspaso::create($data);
+            }else{
+                $error = true;
+            }
+        }
+        else{
             $new = Traspaso::create($data);
         }
-
         
 
-        return response()->json($this->buildTraspaso($new));
+        if($error){
+            return response()->json([ 'error' => $error, 'lel' => $lastRecod->ItemsArray ]);
+        }else{
+            return response()->json( [ 'error' => $error, 'trasp' => $this->buildTraspaso($new) ]);
+        }
+        
 
     }
 
     public function lastRecord(Request $request){
+
         $user = $request->user();
 
         $lastRecod = Traspaso::where('user','=',$user->id)->orderBy('id', 'DESC')->first();
 
-        $lista = Movimiento::lista(['id' => $lastRecod->id ])->get();
+        if( $lastRecod ){
 
-        return response()->json($this->buildTraspaso($lastRecod, $lista));
+            $lista = Movimiento::lista(['id' => $lastRecod->id ])->get();
+
+            return response()->json( ['error' => false , 'trasp' => $this->buildTraspaso($lastRecod, $lista)] );
+        
+        }else{
+
+            return response()->json( ['error' => true, 'trasp' => $lastRecod ] );
+
+        }
+
+        
+
     }
 
     public function buildTraspaso($item, $movimientos = [])
