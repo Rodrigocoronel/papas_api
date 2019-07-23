@@ -39,6 +39,7 @@ Route::middleware(['auth:api'])->group(function ()
 	Route::post('/MovimientoNuevo',              'controladorMovimientos@registrarMovimiento');  // Registrar nuevo movimiento
 	Route::get( '/Movimientos/{folio}',          'controladorMovimientos@movimientosPorFolio');  // Buscar movimientos de un folio especifico
 	Route::get( '/ReporteDeMovimientos/{fecha?}','controladorMovimientos@reportes');             // Reportes de salidas y traspasos
+	Route::get( '/Inventario/{area}',			 'controladorMovimientos@inventarioPorArea');	 // Inventario de botellas por area
 
 	//traspasos
 

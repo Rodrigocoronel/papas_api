@@ -57,7 +57,4 @@ class controladorBotellas extends Controller
         return response()->json($lista);
     }
     
-
-    
-    
 }

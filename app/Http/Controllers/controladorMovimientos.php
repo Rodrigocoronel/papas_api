@@ -381,4 +381,12 @@ class controladorMovimientos extends Controller
         return $pdf->stream("Movimientos.pdf");
     }
 
+    public function inventarioPorArea($area){
+        $reporte = botella::where('almacen_id','=',$area)
+                   ->where('transito','=','0')
+                   ->groupBy('insumo')
+                   ->get();
+        return response()->json($reporte);
+    }
+
 }
