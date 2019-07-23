@@ -29,8 +29,8 @@ class controladorMovimientos extends Controller
             $registro = Botella::where('folio','=',$data['folio'])->first();
             switch($data['movimiento_id'])
             {
-                case "1": // Entrada - El producto debe tener Almacen_actual = 0 (en transito)
-                    if($registro->almacen_id == '0')
+                case "1": // Entrada - El producto debe estar en transito = 0 (en transito)
+                    if($registro->transito == '1')
                     {
                         $mov[0]=[
                             'almacen_id'=> $data['almacen_id'],
@@ -126,7 +126,7 @@ class controladorMovimientos extends Controller
                     break; 
                 case "2": // Salida
 
-                    if( $registro->almacen_id == $data['almacen_id'] )
+                    if( $registro->almacen_id == $data['almacen_id'] && $registro->transito == '0' ) // SI ESTA EN EL ALMACEN
                     {
                         $mov[0]=[
                             'almacen_id'=> $data['almacen_id'],
@@ -138,10 +138,12 @@ class controladorMovimientos extends Controller
 
                         $registro->movimientos()->attach($mov);
                         
-                        $data['transito'] = $data['almacen_id'];
-                        $data['almacen_id'] = $tipoDeSalida;
+                        //$data['transito'] = $data['almacen_id'];
+                        $data['transito'] = '1';
+
+                        //$data['almacen_id'] = $tipoDeSalida;
                         
-                        $registro->almacen_id = $data['almacen_id'];
+                        //$registro->almacen_id = $data['almacen_id'];
                         $registro->transito = $data['transito'];
                         $registro->save();
 

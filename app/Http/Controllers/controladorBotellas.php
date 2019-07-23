@@ -19,8 +19,8 @@ class controladorBotellas extends Controller
         {
             $registro = Botella::create($data);
             $mov[0] =[
-                "almacen_id"=> 1,
-                'movimiento_id' => 1,
+                "almacen_id"=> 1,               // 1 - Almacen General
+                'movimiento_id' => 1,           // 1 - Primer movimiento registrado como entrada
                 'fecha'=> date('Y-m-d H:i:s'),
                 'user' => $user->id,
             ];
