@@ -152,7 +152,7 @@ class controladorMovimientos extends Controller
                         $lista = Movimiento::lista(['id' => $data['trasp_id'] ])->get();
                         $tras = Traspaso::find($data['trasp_id']);
                         $dato=[
-                            'id' => $registro->id,
+                            'id' => $data['trasp_id'],
                             'recibe' => $tras->recibe,
                             'movimientos' => $lista,
                             'movimientos_detallados' => $tras->ItemsArray,
