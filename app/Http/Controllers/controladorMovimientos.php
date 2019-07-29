@@ -55,7 +55,6 @@ class controladorMovimientos extends Controller
                 break;
                 case "5": // Baja - Almacen del que sale debe ser igual a Almacen_actual
                     // *** Hacer que el articulo no se pueda regresar ***
-                    $tipoDeSalida = $tipoDeSalida - 2;
                     
                     $admin_user = User::where('tarjeta','=',$data['tarjeta'])->first();
 
@@ -70,7 +69,7 @@ class controladorMovimientos extends Controller
                                 ];
                                 $registro->movimientos()->attach($mov);
                                 
-                                $data['transito'] = $data['almacen_id'];
+                                $data['transito'] = 5;
                                 $data['almacen_id'] = $tipoDeSalida;
                                 
                                 $registro->almacen_id = $data['almacen_id'];
@@ -97,8 +96,7 @@ class controladorMovimientos extends Controller
                     }
                    
                     break;
-                case "4": // Venta
-                    $tipoDeSalida = $tipoDeSalida - 1;   
+                case "4": // Venta 
                     if( $registro->almacen_id == $data['almacen_id'] )
                     {
                         $mov[0]=[
@@ -109,7 +107,7 @@ class controladorMovimientos extends Controller
                         ];
                         $registro->movimientos()->attach($mov);
                         
-                        $data['transito'] = $data['almacen_id'];
+                        $data['transito'] = 4;
                         $data['almacen_id'] = $tipoDeSalida;
                         
                         $registro->almacen_id = $data['almacen_id'];
@@ -173,9 +171,7 @@ class controladorMovimientos extends Controller
                         ];
                         $registro->movimientos()->attach($mov);
                         
-                        $data['transito'] = $data['almacen_id'];
-                        $data['almacen_id'] = $tipoDeSalida;
-                        
+                        $data['transito'] = 6;                        
                         $registro->almacen_id = $data['almacen_id'];
                         $registro->transito = $data['transito'];
                         $registro->save();
@@ -189,13 +185,13 @@ class controladorMovimientos extends Controller
                     }
 
                 break;
-                case "3": // Cancelacion - Almacen_actual debe ser 0 si esta en transito, o -1 si esta vendido,
+                case "3": // Cancelacion - Si esta vendido o traspasado,
                           // y el almacen que al que regresa debe ser el mismo que libero
                     $admin_user = User::where('tarjeta','=',$data['tarjeta'])->first();
 
                     if(!empty($admin_user)){
                         if($admin_user->tipo == 3){
-                            if( ( $registro->almacen_id == 0 || $registro->almacen_id == -1 ) && ($registro->transito == $data['almacen_id']) )
+                            if( ( $registro->transito == 4 || $registro->transito == 6 ) && ($registro->almacen_id == $data['almacen_id']) )
                             {
                                 $mov[0]=[
                                     'almacen_id'=> $data['almacen_id'],
@@ -382,10 +378,22 @@ class controladorMovimientos extends Controller
     }
 
     public function inventarioPorArea($area){
-        $reporte = botella::where('almacen_id','=',$area)
+
+        if(!$area == 9999)
+        {
+            $reporte = botella::where('almacen_id','=',$area)
                    ->where('transito','=','0')
-                   ->groupBy('insumo')
-                   ->get();
+                   //->groupBy('insumo')
+                   ->orderby('created_at','desc')
+                   ->get();    
+        }else{
+            $reporte = botella::where('almacen_id','>',0)
+                   ->where('transito','=','0')
+                   ->orderby('created_at','desc')
+                   //->groupBy('insumo')
+                   ->get(); 
+        }
+        
         return response()->json($reporte);
     }
 
