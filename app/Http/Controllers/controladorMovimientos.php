@@ -19,9 +19,6 @@ class controladorMovimientos extends Controller
         $user = $datos->user();
         $data = $datos->input();
         $dato = ['temp'=>1];
-        $tipoDeSalida = 0;
-
-        
         
         $registrado = false;
         if(Botella::where('folio','=',$data['folio'])->exists())
@@ -30,7 +27,7 @@ class controladorMovimientos extends Controller
             switch($data['movimiento_id'])
             {
                 case "1": // Entrada - El producto debe estar en transito = 0 (en transito)
-                    if($registro->transito == '1')
+                    if($registro->transito == '1' || $registro->transito == '6')
                     {
                         $mov[0]=[
                             'almacen_id'=> $data['almacen_id'],
@@ -69,9 +66,7 @@ class controladorMovimientos extends Controller
                                 ];
                                 $registro->movimientos()->attach($mov);
                                 
-                                $data['transito'] = 5;
-                                $data['almacen_id'] = $tipoDeSalida;
-                                
+                                $data['transito'] = 5;                                
                                 $registro->almacen_id = $data['almacen_id'];
                                 $registro->transito = $data['transito'];
                                 if($data['motivo'] == '1'){
@@ -92,7 +87,6 @@ class controladorMovimientos extends Controller
                                 ];
                             }
                         }
-
                     }
                    
                     break;
@@ -107,9 +101,7 @@ class controladorMovimientos extends Controller
                         ];
                         $registro->movimientos()->attach($mov);
                         
-                        $data['transito'] = 4;
-                        $data['almacen_id'] = $tipoDeSalida;
-                        
+                        $data['transito'] = 4;                        
                         $registro->almacen_id = $data['almacen_id'];
                         $registro->transito = $data['transito'];
                         $registro->save();
@@ -135,16 +127,9 @@ class controladorMovimientos extends Controller
                         ];
 
                         $registro->movimientos()->attach($mov);
-                        
-                        //$data['transito'] = $data['almacen_id'];
-                        $data['transito'] = '1';
 
-                        //$data['almacen_id'] = $tipoDeSalida;
-                        
-                        //$registro->almacen_id = $data['almacen_id'];
-                        $registro->transito = $data['transito'];
+                        $registro->transito = 1;
                         $registro->save();
-
                         $registrado = true;
 
                         $lista = Movimiento::lista(['id' => $data['trasp_id'] ])->get();
@@ -379,22 +364,40 @@ class controladorMovimientos extends Controller
 
     public function inventarioPorArea($area){
 
-        if(!$area == 9999)
+        if($area == 9999)
+        {
+            $reporte = botella::where('almacen_id','>',0)
+                    ->where('transito','=','0')
+                    ->orderby('created_at','desc')
+                    ->get();
+        }
+        else
         {
             $reporte = botella::where('almacen_id','=',$area)
                    ->where('transito','=','0')
-                   //->groupBy('insumo')
                    ->orderby('created_at','desc')
-                   ->get();    
-        }else{
-            $reporte = botella::where('almacen_id','>',0)
-                   ->where('transito','=','0')
-                   ->orderby('created_at','desc')
-                   //->groupBy('insumo')
-                   ->get(); 
+                   ->get();
         }
-        
+
+        if(!$reporte->isEmpty())
+        {
+            $reporte = $reporte->transform(function($datos)
+            {
+                return $this->GenerarReporteDeInventario($datos);
+            });
+        }
+
         return response()->json($reporte);
+    }
+
+    public function GenerarReporteDeInventario($datos)
+    {
+        return [
+            'id' =>          $datos->id,
+            'insumo' =>      $datos->insumo,
+            'desc_insumo' => $datos->desc_insumo,
+            'almacen_id' =>  $datos->almacen->nombre,
+        ];
     }
 
 }
