@@ -18,12 +18,14 @@ class controladorMovimientos extends Controller
         
         $user = $datos->user();
         $data = $datos->input();
-        $dato = ['temp'=>1];
+        $dato = [];
+        $ubicacion = [];
         
         $registrado = false;
         if(Botella::where('folio','=',$data['folio'])->exists())
         {
             $registro = Botella::where('folio','=',$data['folio'])->first();
+
             switch($data['movimiento_id'])
             {
                 case "1": // Entrada - El producto debe estar en transito = 0 (en transito)
@@ -201,8 +203,12 @@ class controladorMovimientos extends Controller
                     }
                 break;
             }
+            $ubicacion=[
+                'almacen' => $registro->almacen->nombre,
+                'transito' => $registro->transito,
+            ];
         }
-        return response()->json(['registrado' => $registrado, 'movimiento' => $dato ]);
+        return response()->json(['registrado' => $registrado, 'ubicacion'=> $ubicacion, 'movimiento' => $dato ]);
     }
     
     public function movimientosPorFolio($folio){

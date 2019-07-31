@@ -31,13 +31,13 @@ class controladorBotellas extends Controller
     }
     
     public function botellaPorFolio($folio){
-        $registro = Botella::where('folio','=',$folio)->get();
-        if(!$registro->isEmpty())
+        $registro = Botella::where('folio','=',$folio)->first();
+        if($registro)
         {
-            $registro[0]['almacen'] = $registro[0]->almacen;
-            $array=$registro[0]->movimientoArray;
+            $registro['almacen'] = $registro->almacen;
+            $array=$registro->movimientoArray;
             usort($array,  function ( $a, $b ) { return strtotime($a['fecha']) - strtotime($b['fecha']); });
-            $registro[0]['mov'] = $array;
+            $registro['mov'] = $array;
         }
         return response()->json($registro);
     }
