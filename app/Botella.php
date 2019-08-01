@@ -84,7 +84,7 @@ class Botella extends Model
         }
         // 
         $query->select($select);
-
+        $query->where("transito",'=',0);
         if((int)$params['almacen']==9999){
             $query->where("almacen_id",'>',0);
         }else{
