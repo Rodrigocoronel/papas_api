@@ -93,7 +93,7 @@ class controladorMovimientos extends Controller
                    
                     break;
                 case "4": // Venta 
-                    if( $registro->almacen_id == $data['almacen_id'] )
+                    if( $registro->almacen_id == $data['almacen_id'] && $registro->transito == '0' && $registro->almacen_id > 2)
                     {
                         $mov[0]=[
                             'almacen_id'=> $data['almacen_id'],

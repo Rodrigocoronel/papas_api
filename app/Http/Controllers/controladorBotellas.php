@@ -39,6 +39,10 @@ class controladorBotellas extends Controller
             usort($array,  function ( $a, $b ) { return strtotime($a['fecha']) - strtotime($b['fecha']); });
             $registro['mov'] = $array;
         }
+        else
+        {
+            $registro=false;
+        }
         return response()->json($registro);
     }
     
