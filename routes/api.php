@@ -41,6 +41,7 @@ Route::middleware(['auth:api'])->group(function ()
 	Route::get( '/ReporteDeMovimientos/{fecha?}','controladorMovimientos@reportes');             // Reportes de salidas y traspasos
 	Route::get( '/Inventario/{area}',			 'controladorMovimientos@inventarioPorArea');	 // Inventario de botellas por area
 
+
 	//traspasos
 
 	Route::post('/nuevo_traspaso', 'TraspasosController@create');
@@ -51,3 +52,4 @@ Route::post('/logincard','UsersController@login');   											 // Busqueda de 
 Route::get('/reporteDeTraspaso/{traspaso}','controladorMovimientos@generarReporteDeTraspaso'); 			 // Pfd para reporte de traspasos
 //Route::get('/reporteDeBusqueda','controladorMovimientos@imprimirReporteDeBusqueda'); 			 // Pfd para reporte de traspasos
 Route::get('/reporte_de_busqueda','controladorMovimientos@imprimirReporteDeBusqueda'); 			 // Pfd para reporte de busquedas
+Route::get( '/PdfInventario/{area}/{desglosar}','controladorMovimientos@inventarioPorAreaPDF');	 // Inventario de botellas por area

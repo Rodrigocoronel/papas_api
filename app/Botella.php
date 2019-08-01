@@ -3,7 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Query\Expression as Expression;
 class Botella extends Model
 {
     protected $table = 'botella';
@@ -63,5 +63,70 @@ class Botella extends Model
         }
         return $output;
     }
+    /**/
+    /*
+                    \ \|/ /
+                     (O O)
+        +--------oOO--(_)--------------+
+        |       Codigo Rico Alert      |
+        +-----------------oOO----------+
+                    |__|__|
+                     | | |
+                    ooO Ooo
+    */
+    public function scopeInventarioPorArea($query, $params = []) {
+        $select = [];
+        $select[] = "botella.*";
+        if((int)$params['desglosar']==0){
+            $select[] = new Expression("count(botella.id) as `cantidad`");
+        }else{
+            $select[] = new Expression("1 as `cantidad`");
+        }
+        // 
+        $query->select($select);
+
+        if((int)$params['almacen']==9999){
+            $query->where("almacen_id",'>',0);
+        }else{
+             $query->where("almacen_id",'=',$params['almacen']);
+        }
+         if((int)$params['desglosar']==0){
+            $query->groupBy("insumo" );
+            $query->groupBy("almacen_id" );
+         }
+
+
+        if((int)$params['pdf']==0){
+            $query->take($params['take']);
+            $query->skip($params['skip']);
+        }
+        $query->orderBy("id", "ASC");
+
+        
+       
+        return $query;
+    }
+    public function scopeInventarioPorAreaConteo($query, $params = []) {
+        $select = [];
+        $select[] = new Expression("count(botella.id) as `total`");
+        $query->select($select);
+
+        if((int)$params['almacen']==9999){
+                $query->where("almacen_id",'>',0);
+        }else{
+             $query->where("almacen_id",'=',$params['almacen']);
+        }
+        if((int)$params['desglosar']==0){
+            $query->groupBy("insumo" );
+            $query->groupBy("almacen_id" );
+         }
+
+         $query->orderBy("id", "ASC");
+
+        
+       
+        return $query;
+    }
+
 
 }

@@ -11,6 +11,7 @@ use App\Movimiento;
 use App\Botella;
 use App\Traspaso;
 use App\User;
+use App\Almacen;
 
 class controladorMovimientos extends Controller
 {
@@ -368,42 +369,101 @@ class controladorMovimientos extends Controller
         return $pdf->stream("Movimientos.pdf");
     }
 
-    public function inventarioPorArea($area){
-
-        if($area == 9999)
-        {
-            $reporte = botella::where('almacen_id','>',0)
-                    ->where('transito','=','0')
-                    ->orderby('created_at','desc')
-                    ->get();
-        }
-        else
-        {
-            $reporte = botella::where('almacen_id','=',$area)
-                   ->where('transito','=','0')
-                   ->orderby('created_at','desc')
-                   ->get();
-        }
-
-        if(!$reporte->isEmpty())
-        {
-            $reporte = $reporte->transform(function($datos)
-            {
-                return $this->GenerarReporteDeInventario($datos);
-            });
-        }
-
-        return response()->json($reporte);
-    }
-
-    public function GenerarReporteDeInventario($datos)
+     public function GenerarReporteDeInventario($datos)
     {
         return [
-            'id' =>          $datos->id,
+            'id' =>          $datos->folio,
             'insumo' =>      $datos->insumo,
             'desc_insumo' => $datos->desc_insumo,
             'almacen_id' =>  $datos->almacen->nombre,
+            'cantidad'   =>  $datos->cantidad,
         ];
     }
+
+    /**/
+    /*
+                    \ \|/ /
+                     (O O)
+        +--------oOO--(_)--------------+
+        |       Codigo Rico Alert      |
+        +-----------------oOO----------+
+                    |__|__|
+                     | | |
+                    ooO Ooo
+    */
+    public function inventarioPorArea($area){
+
+        /*utilizaremos un scope en el modelo de botella*/
+        $reporte = botella::InventarioPorArea([
+            'almacen'=>$area,
+            'desglosar'     => isset($_GET["desglosar"]) ? $_GET["desglosar"] : null, 
+            'take'     => isset($_GET["take"]) ? $_GET["take"] : null,                     
+            'skip'    => isset($_GET["skip"]) ? $_GET["skip"] : null,
+            'pdf'=>0,
+            ])->get();
+        $conteo = botella::InventarioPorAreaConteo([
+            'almacen'=>$area,
+            'desglosar'     => isset($_GET["desglosar"]) ? $_GET["desglosar"] : null,
+            ])->get();
+
+        $reporte->transform(function($datos)
+        {
+            return $this->GenerarReporteDeInventario($datos);
+        });
+
+        return response()->json(['botellas'=>$reporte,'total'=>$conteo[0]['total'] ]);
+    }
+
+     public function inventarioPorAreaPDF($area,$desglosar){
+
+        /*utilizaremos un scope en el modelo de botella*/
+        $reporte = botella::InventarioPorArea([
+            'almacen'=>$area,
+            'desglosar'     => $desglosar, 
+             'pdf'=>1,
+            ])->get();
+       
+        $reporte->transform(function($datos)
+        {
+            return $this->GenerarReporteDeInventario($datos);
+        });
+       
+        if((int)$area==9999){
+            $almacen='Todas Las Areas';
+        }
+        else{
+            $registro=Almacen::find($area);
+            $almacen=$registro->nombre;
+        }
+             
+
+        if((int)$desglosar==0){
+        $pdf = PDF::loadView('pdf.inventarioAgrupado', ['data'=>$reporte,'almacen'=>$almacen] );
+        $pdf->setPaper('letter');
+        $pdf->output();
+        $dom_pdf = $pdf->getDomPDF();
+        $canvas = $dom_pdf ->get_canvas();
+        $canvas->page_text(25, 760, "WeNatives 2019.", null, 10, array(0, 0, 0));
+        $canvas->page_text(520, 760, "Página {PAGE_NUM} de {PAGE_COUNT}", null, 10, array(0, 0, 0));
+        return $pdf->stream("Inventario.pdf");
+        }
+        else{
+            $pdf = PDF::loadView('pdf.inventarioDesgloce', ['data'=>$reporte,'almacen'=>$almacen] );
+            $pdf->setPaper('letter');
+            $pdf->output();
+            $dom_pdf = $pdf->getDomPDF();
+            $canvas = $dom_pdf ->get_canvas();
+            $canvas->page_text(25, 760, "WeNatives 2019.", null, 10, array(0, 0, 0));
+            $canvas->page_text(520, 760, "Página {PAGE_NUM} de {PAGE_COUNT}", null, 10, array(0, 0, 0));
+            return $pdf->stream("Inventario.pdf");
+        }
+
+
+
+        return response()->json(['botellas'=>$reporte ]);
+        }
+    
+
+
 
 }

@@ -37,7 +37,7 @@
 				<tr>
 					<td align="center">{{$dataValues['cantidad']}}</td>
 					<td align="center">{{$dataValues['insumo']}}</td>
-					<td align="center">{{$dataValues['desc']}}</td>
+					<td align="center">{{$dataValues['desc_insumo']}}</td>
 				</tr>
 			@endforeach
 		</tbody>
