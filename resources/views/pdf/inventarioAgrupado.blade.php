@@ -29,7 +29,8 @@
 			<tr>
 				<th width="15%">Cantidad</th>
 				<th width="15%">Insumo</th>
-				<th width="15%">Desc.</th>
+				<th width="50%">Desc.</th>
+				<th width="20%">Area</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -38,6 +39,7 @@
 					<td align="center">{{$dataValues['cantidad']}}</td>
 					<td align="center">{{$dataValues['insumo']}}</td>
 					<td align="center">{{$dataValues['desc_insumo']}}</td>
+					<td align="center">{{$dataValues['almacen_id']}}</td>
 				</tr>
 			@endforeach
 		</tbody>

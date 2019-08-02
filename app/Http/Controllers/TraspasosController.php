@@ -9,6 +9,8 @@ use PDF;
 
 use App\Traspaso;
 use App\Movimiento;
+use App\Almacen;
+
 
 class TraspasosController extends Controller
 {
@@ -21,6 +23,7 @@ class TraspasosController extends Controller
         $error = false;
         $new = [];
 
+        $data['destino'] => 
         $lastRecod = Traspaso::where('user','=',$user->id)->orderBy('id', 'DESC')->first();
 
         $data['user'] = $user->id;
@@ -75,6 +78,8 @@ class TraspasosController extends Controller
         [
             'id' => $item->id,
             'recibe' => $item->recibe,
+            'origen' => $item->origen,
+            'destino' => $item->destino,
             'movimientos' => $movimientos != [] ? $movimientos : [],
             'movimientos_detallados' => $item->ItemsArray,
             'edit' => $item->edit

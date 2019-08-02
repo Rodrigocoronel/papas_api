@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
-		<title>Reporte De Traspaso</title>
+		<title>Reporte De Movimientos</title>
 		<style type="text/css">
 
 			.header {  }

@@ -139,6 +139,9 @@ class controladorMovimientos extends Controller
                         $tras = Traspaso::find($data['trasp_id']);
                         $dato=[
                             'id' => $data['trasp_id'],
+                            'folio' =>$data['folio'],
+                            'movimiento_id' => $data['movimiento_id'],
+                            'desc_insumo' => $registro['desc_insumo'],
                             'recibe' => $tras->recibe,
                             'movimientos' => $lista,
                             'movimientos_detallados' => $tras->ItemsArray,

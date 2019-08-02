@@ -12,6 +12,8 @@ class Traspaso extends Model
     protected $fillable = [
                 'id',
                 'user',
+                'origen',
+                'destino',
                 'recibe',
                 'edit'
             ];
@@ -21,7 +23,17 @@ class Traspaso extends Model
 
     public function user_rel()
     {
-        return $this->belongsTo('App\user', 'user' , 'id');
+        return $this->belongsTo('App\User', 'user' , 'id');
+    }
+
+    public function origen_rel()
+    {
+        return $this->belongsTo('App\Almacen', 'origen' , 'id');
+    }
+
+    public function destino_rel()
+    {
+        return $this->belongsTo('App\Almacen', 'destino' , 'id');
     }
 
     public function contenido_traspaso()

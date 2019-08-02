@@ -5,8 +5,6 @@
 		<title>Reporte De Traspaso</title>
 		<style type="text/css">
 
-			
-
 			.header {
 
 			}
@@ -42,10 +40,10 @@
 		<br> <br>
 		<table class="general" >
 			<tr>
-				<td width=35%>
+				<td width=50%>
 					<b> Reporte De Traspaso De Botellas #{{$dataTraspaso->id}}</b>
 				</td>
-				<td width=40%> </td>
+				<td width=25%> </td>
 				<td class="der" width=25%>
 					<b> Fecha: </b> <i> {{$dataTraspaso['created_at']}}</i>
 				</td>
@@ -54,9 +52,10 @@
 		<br>
 		<table class="general">
 			<tr>
-				<td width=18%> <b> Area De Salida: </b> </td>
-				<td>  {{ $dataTraspaso->user_rel->almacen->nombre }} </td>
-
+				<td width=18%> <b> Area De Origen: </b> </td>
+				<td width=32%> {{ $dataTraspaso->origen_rel->nombre }} </td>
+				<td width=18%> <b> Area De Destino: </b> </td>
+				<td width=32%> {{ $dataTraspaso->destino_rel->nombre }} </td>
 			</tr>
 		</table>
 		<hr>
