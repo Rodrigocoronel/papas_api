@@ -19,9 +19,5 @@ class Almacen extends Model
     // Campos de la tabla no visibles para el usuario
     protected $hidden = [];
 
-    public function destino_id()
-    {
-        return $this->belongTo('App\Almacen', 'nombre' ,  'id');
-    }
 
 }

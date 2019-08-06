@@ -28,10 +28,7 @@
 			if($movimiento == "") $movimiento = "- - - - - - -";
 		?>
 
-		<table class="header">
-			<img src="../storage/app/images/logob.jpg" width=100; height=25; />
-		</table>
-		<br> <br>
+		<br> <br> <br>
 		<table class="general">
 			<tr>
 				<td width=35%>

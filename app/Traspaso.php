@@ -31,14 +31,14 @@ class Traspaso extends Model
         return $this->belongsTo('App\Almacen', 'origen' , 'id');
     }
 
-    public function destino_rel()
-    {
-        return $this->belongsTo('App\Almacen', 'destino' , 'id');
-    }
-
     public function contenido_traspaso()
     {
         return $this->hasMany('App\Movimiento' , 'trasp_id' , 'id');
+    }
+
+    public function destino_rel()
+    {
+        return $this->belongsTo('App\Almacen', 'destino' ,  'id');
     }
 
     public function getItemsArrayAttribute() {

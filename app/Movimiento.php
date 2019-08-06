@@ -28,6 +28,11 @@ class Movimiento extends Model
         return $this->belongsTo('App\Almacen', 'almacen_id');
     }
 
+    public function destino()
+    {
+        return $this->belongsTo('App\Almacen', 'almacen_id');
+    }
+
     public function botella()
     {
         return $this->belongsTo('App\Botella', 'botella_id');
@@ -36,7 +41,6 @@ class Movimiento extends Model
     public function getFolioAttribute() {
 
         return $this->botella->folio;
-
     }
 
     public function getDescAttribute() {

@@ -55,7 +55,7 @@
 				<td width=18%> <b> Area De Origen: </b> </td>
 				<td width=32%> {{ $dataTraspaso->origen_rel->nombre }} </td>
 				<td width=18%> <b> Area De Destino: </b> </td>
-				<td width=32%> {{ $dataTraspaso->destino_rel->nombre }} </td>
+				<td width=32%> {{ $dataTraspaso['destino'] }} </td>
 			</tr>
 		</table>
 		<hr>

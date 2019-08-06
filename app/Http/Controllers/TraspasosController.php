@@ -23,7 +23,6 @@ class TraspasosController extends Controller
         $error = false;
         $new = [];
 
-        $data['destino'] => 
         $lastRecod = Traspaso::where('user','=',$user->id)->orderBy('id', 'DESC')->first();
 
         $data['user'] = $user->id;

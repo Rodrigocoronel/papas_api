@@ -111,7 +111,7 @@ class controladorMovimientos extends Controller
 
                         $registrado = true;
                         $dato=[
-                            'folio' =>$data['folio'],
+                            'folio' => $data['folio'],
                             'movimiento_id' => $data['movimiento_id'],
                             'desc_insumo' => $registro['desc_insumo'],
                         ];
@@ -362,11 +362,13 @@ class controladorMovimientos extends Controller
             break;
         }
         $reporte = $lista->transform( function($datos) { return $this->GenerarReporte($datos); } );
+        $logo = storage_path('/app/images/papaslogoonwhite.jpg');
         $pdf = PDF::loadView('pdf.reporte', ['fecha1'=>$fechaInicial, 'fecha2'=>$fechaFinal, 'area'=>$almacen, 'movimiento'=>$movimiento, 'movimientos'=> $reporte] );
         $pdf->setPaper('letter');
         $pdf->output();
         $dom_pdf = $pdf->getDomPDF();
         $canvas = $dom_pdf ->get_canvas();
+        $canvas->image($logo, 35, 38, 100, 32);
         $canvas->page_text(25, 760, "WeNatives 2019.", null, 10, array(0, 0, 0));
         $canvas->page_text(520, 760, "Página {PAGE_NUM} de {PAGE_COUNT}", null, 10, array(0, 0, 0));
         return $pdf->stream("Movimientos.pdf");
@@ -421,10 +423,12 @@ class controladorMovimientos extends Controller
 
         /*utilizaremos un scope en el modelo de botella*/
         $reporte = botella::InventarioPorArea([
-            'almacen'=>$area,
-            'desglosar'     => $desglosar, 
-             'pdf'=>1,
-            ])->get();
+            'almacen'   =>$area,
+            'desglosar' => $desglosar, 
+            'pdf'       =>1,
+        ])->get();
+        $fecha = date('d/m/Y');
+        $hora = date('H:i:s', time());
        
         $reporte->transform(function($datos)
         {
@@ -438,24 +442,26 @@ class controladorMovimientos extends Controller
             $registro=Almacen::find($area);
             $almacen=$registro->nombre;
         }
-             
+        $logo = storage_path('/app/images/papaslogoonwhite.jpg');
 
         if((int)$desglosar==0){
-        $pdf = PDF::loadView('pdf.inventarioAgrupado', ['data'=>$reporte,'almacen'=>$almacen] );
+        $pdf = PDF::loadView('pdf.inventarioAgrupado', ['data'=>$reporte,'almacen'=>$almacen,'fecha'=>$fecha,'hora'=>$hora] );
         $pdf->setPaper('letter');
         $pdf->output();
         $dom_pdf = $pdf->getDomPDF();
         $canvas = $dom_pdf ->get_canvas();
+        $canvas->image($logo, 30, 38, 80, 32);
         $canvas->page_text(25, 760, "WeNatives 2019.", null, 10, array(0, 0, 0));
         $canvas->page_text(520, 760, "Página {PAGE_NUM} de {PAGE_COUNT}", null, 10, array(0, 0, 0));
         return $pdf->stream("Inventario.pdf");
         }
         else{
-            $pdf = PDF::loadView('pdf.inventarioDesgloce', ['data'=>$reporte,'almacen'=>$almacen] );
+            $pdf = PDF::loadView('pdf.inventarioDesgloce', ['data'=>$reporte,'almacen'=>$almacen,'fecha'=>$fecha,'hora'=>$hora] );
             $pdf->setPaper('letter');
             $pdf->output();
             $dom_pdf = $pdf->getDomPDF();
             $canvas = $dom_pdf ->get_canvas();
+            $canvas->image($logo, 30, 38, 80, 32);
             $canvas->page_text(25, 760, "WeNatives 2019.", null, 10, array(0, 0, 0));
             $canvas->page_text(520, 760, "Página {PAGE_NUM} de {PAGE_COUNT}", null, 10, array(0, 0, 0));
             return $pdf->stream("Inventario.pdf");
