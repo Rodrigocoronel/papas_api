@@ -11,7 +11,6 @@ use App\Factura;
 use SimpleXMLElement;
 use DomDocument;
 
-
 class controladorFacturas extends Controller
 {
 	public function cargarFactura(Request $datos)
@@ -33,18 +32,28 @@ class controladorFacturas extends Controller
 			foreach ($xml->xpath('//cfdi:Receptor') as $cfdiReceptor)
 			{ 
 				$factura['comprador']=$cfdiReceptor['Nombre'].'';
-			} 
+			}
+
+
+			// ------------------------------------------
+			$impreso = 0; // Revisar si ya se imprimio
+			// ------------------------------------------
+
 
 			$articulos=[];
+			$noArticulos=0;
 			$items=$xml->xpath('//cfdi:Comprobante//cfdi:Conceptos//cfdi:Concepto');
-			$indice=0;
 			foreach($items as $item)
 			{
 				$articulo=[
-					'insumo'=> $item['NoIdentificacion'].'',
-					'desc_insumo'=> $item['Descripcion'].'',
-					'cantidad'=> $item['Cantidad'].'',
-				]; 
+					'insumo'      => $item['NoIdentificacion'].'',
+					'desc_insumo' => $item['Descripcion'].'',
+					'cantidad'    => $item['Cantidad'].'',
+					'max' 		  => $item['Cantidad'].'',
+				];
+				$noArticulos = $noArticulos + $item['Cantidad'];
+				if($impreso == 1) $articulo['max'] = 0;
+
 				array_push($articulos, $articulo);
 			}
 
@@ -54,14 +63,28 @@ class controladorFacturas extends Controller
 				return response()->json(['error' => $error]);
 			}
 
-			$impreso = 0; // Revisar si ya se imprimio
-
-			return response()->json(['error' => $error, 'factura' => $factura, 'articulos' => $articulos, 'impreso' => $impreso]);
+			return response()->json([ 'error'       => $error,
+									  'factura'     => $factura,
+									  'noArticulos' => $noArticulos,
+									  'articulos'   => $articulos,
+									  'impreso'     => $impreso
+									]);
 		}
 		else
 		{
 			// No hay archivo
 			return response()->json(['error'=>'1']);
 		}
+	}
+
+	public function imprimirEtiquetas(Request $data)
+	{
+		$datos = $data->input();
+
+		// Guardar folio de factura
+		// Generar folio de etiquetas
+		// Generar etiquetas
+
+		return response()->json(['imprimiendo' => true]);
 	}
 }
