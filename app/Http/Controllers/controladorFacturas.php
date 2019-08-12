@@ -80,11 +80,26 @@ class controladorFacturas extends Controller
 	public function imprimirEtiquetas(Request $data)
 	{
 		$datos = $data->input();
+		$botellas = $datos['botellas'];
+		$factura = $datos['factura'];
 
+		$etiquetas=[];
+
+		// --------------------------
 		// Guardar folio de factura
+		// --------------------------
+
+
+
 		// Generar folio de etiquetas
 		// Generar etiquetas
+		foreach ($botellas as $etiqueta) {
 
-		return response()->json(['imprimiendo' => true]);
+			array_push($etiquetas,$etiqueta);
+		
+		}
+
+
+		return response()->json([$etiquetas]);
 	}
 }
