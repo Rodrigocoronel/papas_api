@@ -442,7 +442,7 @@ class controladorMovimientos extends Controller
             $registro=Almacen::find($area);
             $almacen=$registro->nombre;
         }
-        $logo = storage_path('/app/images/papaslogoonwhite.jpg');
+        $logo = storage_path('/app/images/papaslogoonwhite.jpeg');
 
         if((int)$desglosar==0){
         $pdf = PDF::loadView('pdf.inventarioAgrupado', ['data'=>$reporte,'almacen'=>$almacen,'fecha'=>$fecha,'hora'=>$hora] );
