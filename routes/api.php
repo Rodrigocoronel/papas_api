@@ -21,9 +21,10 @@ Route::middleware(['auth:api'])->group(function ()
 	Route::post('/Usuario',                      'UsersController@update');                       // Actualizar datos de un usuario
 	Route::get('/user_by_id/{id}' ,              'UsersController@get_user_id');
 
-	// Facturas
+	// Etiquetas
 	Route::post('/CargarXml',                    'controladorFacturas@cargarFactura');            // Sube archivo xml para generar etiquetas
-	Route::post('/GenerarEtiquetas',			 'controladorFacturas@imprimirEtiquetas');		  // Imprime etiquetas 
+	Route::post('/GenerarEtiquetas',			 'controladorFacturas@imprimirEtiquetas');		  // Imprime etiquetas
+	Route::post('/Eliminar',					 'controladorFacturas@eliminarEtiqueta');		  // Elimina una etiqueta del sistema
 
 	// Botellas
 	Route::post('/BotellaNueva',                 'controladorBotellas@registrarBotella');         // Registrar nueva botella
@@ -42,7 +43,7 @@ Route::middleware(['auth:api'])->group(function ()
 	Route::post('/MovimientoNuevo',              'controladorMovimientos@registrarMovimiento');   // Registrar nuevo movimiento
 	Route::get( '/Movimientos/{folio}',          'controladorMovimientos@movimientosPorFolio');   // Buscar movimientos de un folio especifico
 	Route::get( '/ReporteDeMovimientos/{fecha?}','controladorMovimientos@reportes');              // Reportes de salidas y traspasos
-	Route::get( '/Inventario/{area}',			 'controladorMovimientos@inventarioPorArea');	  // Inventario de botellas por area
+	Route::get( '/Inventario/{area}',			 'controladorMovimientos@inventario');	  // Inventario de botellas por area
 
 	//traspasos
 	Route::post('/nuevo_traspaso', 'TraspasosController@create');
@@ -53,4 +54,4 @@ Route::post('/logincard','UsersController@login');   											 // Busqueda de 
 Route::get('/reporteDeTraspaso/{traspaso}','controladorMovimientos@generarReporteDeTraspaso'); 			 // Pfd para reporte de traspasos
 //Route::get('/reporteDeBusqueda','controladorMovimientos@imprimirReporteDeBusqueda'); 			 // Pfd para reporte de traspasos
 Route::get('/reporte_de_busqueda','controladorMovimientos@imprimirReporteDeBusqueda'); 			 // Pfd para reporte de busquedas
-Route::get( '/PdfInventario/{area}/{desglosar}','controladorMovimientos@inventarioPorAreaPDF');	 // Inventario de botellas por area
+Route::get( '/PdfInventario/{area}/{desglosar}','controladorMovimientos@inventarioPDF');	 // Inventario de botellas por area

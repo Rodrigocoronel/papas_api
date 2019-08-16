@@ -71,7 +71,7 @@ class Botella extends Model
         |       Codigo Rico Alert      |
         +-----------------oOO----------+
                     |__|__|
-                     | | |
+                     || ||
                     ooO Ooo
     */
     public function scopeInventarioPorArea($query, $params = []) {

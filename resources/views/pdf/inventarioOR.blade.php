@@ -26,7 +26,7 @@
 		
 	</head>
 	<body>
-		<h2 align="center">REPORTE DE INVENTARIO </h2>
+		<h2 align="center">REPORTE DE INVENTARIO - OK </h2>
 		<table class="encabezados">
 			<thead>
 				<tr>
@@ -45,11 +45,11 @@
 				</tr>
 			</thead>
 		</table>
-		
+
 		<table class="utilidad" border="1px solid">
 			<thead>
 				<tr>
-					<th align="center" width="15%">Fólio</th>
+					<th align="center" width="15%">Cantidad</th>
 					<th align="center" width="15%">Insumo</th>
 					<th align="center" width="50%">Descripción</th>
 					<th align="center" width="20%">Área</th>
@@ -58,7 +58,7 @@
 			<tbody>
 				@foreach($data as $todo => $dataValues)
 					<tr>
-						<td align="center">{{$dataValues['id']}}</td>
+						<td align="center">{{$dataValues['cantidad']}}</td>
 						<td align="center">{{$dataValues['insumo']}}</td>
 						<td align="center">{{$dataValues['desc_insumo']}}</td>
 						<td align="center">{{$dataValues['almacen_id']}}</td>
@@ -66,6 +66,5 @@
 				@endforeach
 			</tbody>
 		</table>
-
 	</body>
 </html>

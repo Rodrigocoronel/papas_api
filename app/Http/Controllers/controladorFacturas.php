@@ -8,6 +8,8 @@ use Illuminate\Database\Query\Expression as Expression;
 use PDF;
 
 use App\Factura;
+use App\Botella;
+use App\Movimiento;
 use SimpleXMLElement;
 use DomDocument;
 
@@ -85,10 +87,11 @@ class controladorFacturas extends Controller
 
 		$etiquetas=[];
 
+		//if(!Factura::where('folio_factura','=',$data['folio'])->exists())
+
 		// --------------------------
 		// Guardar folio de factura
 		// --------------------------
-
 
 
 		// Generar folio de etiquetas
@@ -101,5 +104,29 @@ class controladorFacturas extends Controller
 
 
 		return response()->json([$etiquetas]);
+	}
+
+	public function eliminarEtiqueta(Request $data)
+	{
+		$user = $data->user();
+		$datos = $data->input();
+		$folio = $datos['botella'];
+		$motivo = $datos['motivo'];
+
+		$registro = Botella::where('folio','=',$folio)->first();
+
+		$mov[0]=[
+                'almacen_id'=> $registro['almacen_id'],
+                'movimiento_id' => 5,
+                'fecha'=> date('Y-m-d H:i:s'),
+                'user' => $user->id,
+        ];
+        $registro->movimientos()->attach($mov);
+        $registro->transito = 5;
+        $registro->motivo = $motivo;
+        $registro->save();
+
+		$registrado = true;
+		return response()->json(['registrado' => $registrado 'registro' => $registro]);
 	}
 }
