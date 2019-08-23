@@ -18,6 +18,7 @@ class controladorFacturas extends Controller
 	public function cargarFactura(Request $datos)
 	{
 		$error = 0; // Archivo OK
+		$impreso = 0; // Revisar si ya se imprimio
 		$archivo = $datos->file('archivo');
 		if(!empty($archivo))
 		{
@@ -36,20 +37,19 @@ class controladorFacturas extends Controller
 				$factura['comprador']=$cfdiReceptor['Nombre'].'';
 			}
 
-
-			// ------------------------------------------
-			$impreso = 0; // Revisar si ya se imprimio
-			// ------------------------------------------
-
-
+			if(Factura::where('folio_factura','=',$factura['folio_factura'])->exists())
+			{
+				$impreso=1;
+			}
+			
 			$articulos=[];
 			$noArticulos=0;
 			$items=$xml->xpath('//cfdi:Comprobante//cfdi:Conceptos//cfdi:Concepto');
 			foreach($items as $item)
 			{
 				$articulo=[
-					'insumo'      => $item['NoIdentificacion'].'',
-					'desc_insumo' => $item['Descripcion'].'',
+					'insumo'      => '',
+					'desc_insumo' => '',
 					'cantidad'    => $item['Cantidad'].'',
 					'max' 		  => $item['Cantidad'].'',
 				];
@@ -64,13 +64,13 @@ class controladorFacturas extends Controller
 				$error = 2; // Archivo incorrecto
 				return response()->json(['error' => $error]);
 			}
-
+			if($impreso == 1) $noArticulos = 0;
 			return response()->json([ 'error'       => $error,
 									  'factura'     => $factura,
 									  'noArticulos' => $noArticulos,
 									  'articulos'   => $articulos,
 									  'impreso'     => $impreso
-									]);
+			]);
 		}
 		else
 		{
@@ -89,13 +89,15 @@ class controladorFacturas extends Controller
 
 		//if(!Factura::where('folio_factura','=',$data['folio'])->exists())
 
-		// --------------------------
-		// Guardar folio de factura
-		// --------------------------
+			// --------------------------
+			// Guardar folio de factura
+			// --------------------------
 
 
 		// Generar folio de etiquetas
+
 		// Generar etiquetas
+		
 		foreach ($botellas as $etiqueta) {
 
 			array_push($etiquetas,$etiqueta);
@@ -103,7 +105,7 @@ class controladorFacturas extends Controller
 		}
 
 
-		return response()->json([$etiquetas]);
+		return response()->json([$factura]);
 	}
 
 	public function eliminarEtiqueta(Request $data)
@@ -127,6 +129,7 @@ class controladorFacturas extends Controller
         $registro->save();
 
 		$registrado = true;
-		return response()->json(['registrado' => $registrado 'registro' => $registro]);
+		return response()->json(['registrado' => $registrado, 'registro' => $registro]);
 	}
+
 }

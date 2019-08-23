@@ -118,7 +118,6 @@ class controladorMovimientos extends Controller
                     }
                     break; 
                 case "2": // Salida
-
                     if( $registro->almacen_id == $data['almacen_id'] && $registro->transito == '0' ) // SI ESTA EN EL ALMACEN
                     {
                         $mov[0]=[
@@ -220,7 +219,8 @@ class controladorMovimientos extends Controller
         return response()->json($lista);
     }
     
-    public function reportes(){
+    public function reportes()
+    {
         $lista='';
         $reporte='';
 
@@ -310,7 +310,6 @@ class controladorMovimientos extends Controller
 
     public function imprimirReporteDeBusqueda()
     {
-
         $lista='';
         $reporte='';
 
@@ -374,7 +373,7 @@ class controladorMovimientos extends Controller
         return $pdf->stream("Movimientos.pdf");
     }
 
-     public function GenerarReporteDeInventario($datos)
+    public function GenerarReporteDeInventario($datos)
     {
         return [
             'id' =>          $datos->folio,
@@ -385,7 +384,8 @@ class controladorMovimientos extends Controller
         ];
     }
 
-    public function inventario($area){
+    public function inventario($area)
+    {
 
         /*utilizaremos un scope en el modelo de botella*/
         $reporte = botella::InventarioPorArea([
@@ -424,10 +424,12 @@ class controladorMovimientos extends Controller
             return $this->GenerarReporteDeInventario($datos);
         });
        
-        if((int)$area==9999){
+        if((int)$area==9999)
+        {
             $almacen='Todas Las Areas';
         }
-        else{
+        else
+        {
             $registro=Almacen::find($area);
             $almacen=$registro->nombre;
         }
@@ -444,9 +446,6 @@ class controladorMovimientos extends Controller
         return $pdf->stream("Inventario.pdf");
 
         return response()->json(['botellas'=>$reporte ]);
-        }
+    }
     
-
-
-
 }

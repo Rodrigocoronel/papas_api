@@ -26,6 +26,10 @@ Route::middleware(['auth:api'])->group(function ()
 	Route::post('/GenerarEtiquetas',			 'controladorFacturas@imprimirEtiquetas');		  // Imprime etiquetas
 	Route::post('/Eliminar',					 'controladorFacturas@eliminarEtiqueta');		  // Elimina una etiqueta del sistema
 
+	// Productos
+	Route::get( '/Producto/{id}',                'controladorProductos@productoPorCodigo');           // Buscar almacen
+	Route::get( '/Productos',                    'controladorProductos@todosLosProductos');       // Mostrar todos los almacenes
+
 	// Botellas
 	Route::post('/BotellaNueva',                 'controladorBotellas@registrarBotella');         // Registrar nueva botella
 	Route::get( '/Botella/{folio}',              'controladorBotellas@botellaPorFolio');          // Encontrar Por Folio
