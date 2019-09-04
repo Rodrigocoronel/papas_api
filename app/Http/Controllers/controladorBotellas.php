@@ -30,8 +30,8 @@ class controladorBotellas extends Controller
         return response()->json($registrado);
     }
     
-    public function botellaPorFolio($folio){
-        $registro = Botella::where('folio','=',$folio)->first();
+    public function botellaPorFolio($id){
+        $registro = Botella::where('id','=',$id)->first();
         if($registro)
         {
             $registro['almacen'] = $registro->almacen;

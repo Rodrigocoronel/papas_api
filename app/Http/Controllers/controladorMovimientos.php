@@ -23,9 +23,9 @@ class controladorMovimientos extends Controller
         $ubicacion = [];
         
         $registrado = false;
-        if(Botella::where('folio','=',$data['folio'])->exists())
+        if(Botella::where('id','=',$data['folio'])->exists())
         {
-            $registro = Botella::where('folio','=',$data['folio'])->first();
+            $registro = Botella::where('id','=',$data['folio'])->first();
 
             switch($data['movimiento_id'])
             {
@@ -47,7 +47,7 @@ class controladorMovimientos extends Controller
                         $registrado = true;
                         
                         $dato=[
-                            'folio' => $data['folio'],
+                            'id' => $data['folio'],
                             'movimiento_id' => $data['movimiento_id'],
                             'desc_insumo' => $registro['desc_insumo'],
                         ];
@@ -284,7 +284,7 @@ class controladorMovimientos extends Controller
         return [
             'fecha' =>         $datos->fecha,
             'movimiento_id' => $datos->movimiento_id,
-            'botella_id' =>    $datos->botella->folio,
+            'botella_id' =>    $datos->botella_id,
             'botella_desc' =>  $datos->botella->desc_insumo,
             'almacen_id' =>    $datos->almacen->nombre,
         ];
@@ -376,7 +376,7 @@ class controladorMovimientos extends Controller
     public function GenerarReporteDeInventario($datos)
     {
         return [
-            'id' =>          $datos->folio,
+            'id' =>          $datos->id,
             'insumo' =>      $datos->insumo,
             'desc_insumo' => $datos->desc_insumo,
             'almacen_id' =>  $datos->almacen->nombre,

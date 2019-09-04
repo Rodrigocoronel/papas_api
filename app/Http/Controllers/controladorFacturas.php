@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+include storage_path()."/librerias/phpqrcode/qrlib.php";
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Database\Query\Expression as Expression;
@@ -9,9 +9,11 @@ use PDF;
 
 use App\Factura;
 use App\Botella;
+use App\Insumos;
 use App\Movimiento;
 use SimpleXMLElement;
 use DomDocument;
+use QRcode;
 
 class controladorFacturas extends Controller
 {
@@ -30,7 +32,9 @@ class controladorFacturas extends Controller
 			foreach ($xml->xpath('//cfdi:Comprobante') as $cfdiComprobante)
 			{ 
 				$factura['folio_factura']=$cfdiComprobante['Folio'].'';
-				$factura['fecha_compra']=$cfdiComprobante['Fecha'].'';
+				$temp=strtotime($cfdiComprobante['Fecha'].'');
+				$factura['fecha_compra']= date('Y-m-d',$temp);
+
 			}
 			foreach ($xml->xpath('//cfdi:Receptor') as $cfdiReceptor)
 			{ 
@@ -40,30 +44,45 @@ class controladorFacturas extends Controller
 			if(Factura::where('folio_factura','=',$factura['folio_factura'])->exists())
 			{
 				$impreso=1;
-			}
-			
-			$articulos=[];
-			$noArticulos=0;
-			$items=$xml->xpath('//cfdi:Comprobante//cfdi:Conceptos//cfdi:Concepto');
-			foreach($items as $item)
-			{
-				$articulo=[
-					'insumo'      => '',
-					'desc_insumo' => '',
-					'cantidad'    => $item['Cantidad'].'',
-					'max' 		  => $item['Cantidad'].'',
-				];
-				$noArticulos = $noArticulos + $item['Cantidad'];
-				if($impreso == 1) $articulo['max'] = 0;
+				$laFactura = Factura::where('folio_factura','=',$factura['folio_factura'])->first();
 
-				array_push($articulos, $articulo);
+				$error=0;
+				$factura=$laFactura;
+				$noArticulos=0;
+				$articulos=$laFactura->insumosProd;
+				$impreso=$impreso;
+
+
+
+			}
+			else
+			{
+				$articulos=[];
+				$noArticulos=0;
+				$items=$xml->xpath('//cfdi:Comprobante//cfdi:Conceptos//cfdi:Concepto');
+				foreach($items as $item)
+				{
+					$articulo=[
+						'insumo'      => '',
+						'desc_insumo' => '',
+						'referencia'  => $item['Descripcion'].'',
+						'cantidad'    => (int)($item['Cantidad']).'',
+						'max' 		  => (int)($item['Cantidad']).'',
+						'producto_id' => ''
+					];
+					$noArticulos = $noArticulos + $item['Cantidad'];
+					if($impreso == 1) $articulo['max'] = 0;
+
+					array_push($articulos, $articulo);
+				}
+
+				if(empty($factura) || empty($articulos))
+				{
+					$error = 2; // Archivo incorrecto
+					return response()->json(['error' => $error]);
+				}
 			}
 
-			if(empty($factura) || empty($articulos))
-			{
-				$error = 2; // Archivo incorrecto
-				return response()->json(['error' => $error]);
-			}
 			if($impreso == 1) $noArticulos = 0;
 			return response()->json([ 'error'       => $error,
 									  'factura'     => $factura,
@@ -79,43 +98,105 @@ class controladorFacturas extends Controller
 		}
 	}
 
-	public function imprimirEtiquetas(Request $data)
+	public function generarEtiquetas(Request $data)
 	{
+		$user = $data->user();
 		$datos = $data->input();
-		$botellas = $datos['botellas'];
-		$factura = $datos['factura'];
+		$datos_botellas = $datos['botellas'];
+		$datos_factura = $datos['factura'];
 
 		$etiquetas=[];
+		$registro=[];
 
-		//if(!Factura::where('folio_factura','=',$data['folio'])->exists())
+		// Generar registro de factura
+		if(!Factura::where('folio_factura','=',$datos_factura['folio_factura'])->exists())
+		{
+			$factura = Factura::create($datos_factura);
 
-			// --------------------------
-			// Guardar folio de factura
-			// --------------------------
-
-
-		// Generar folio de etiquetas
-
-		// Generar etiquetas
-		
-		foreach ($botellas as $etiqueta) {
-
-			array_push($etiquetas,$etiqueta);
-		
+			foreach ($datos_botellas as $botella => $value) {
+				$value['factura_id'] = $factura->id;
+				$new = Insumos::create($value);
+			}
+		}
+		else
+		{
+			$factura = Factura::where('folio_factura','=',$datos_factura['folio_factura'])->first();
 		}
 
+		// Generar registro etiquetas
+		foreach ($datos_botellas as $etiqueta) 
+		{
+			
+			$etiqueta['factura_id']=$factura['id'];
+			$etiqueta['fecha_compra']=$factura['fecha_compra'];
+			$etiqueta['folio_factura']=$factura['folio_factura'];
+			$etiqueta['comprador']=$factura['comprador'];
+			$etiqueta['almacen_id']=1;
+			$cant = (int)($etiqueta['cantidad']);
 
-		return response()->json([$factura]);
+			for($a=0; $a < $cant; $a++)
+			{
+				unset($etiqueta['id']);
+				$registro = Botella::create($etiqueta);
+				$mov[0] = [
+					"almacen_id"=> 1,               // 1 - Almacen General
+					'movimiento_id' => 1,           // 1 - Primer movimiento registrado como entrada
+					'fecha'=> date('Y-m-d H:i:s'),
+					'user' => $user->id,
+				];
+				$registro->movimientos()->attach($mov);
+				$etiqueta['id'] = $registro['id'];
+				array_push($etiquetas,$etiqueta);
+			}
+		}
+
+		// Generar codigo QR
+		$PNG_TEMP_DIR = storage_path()."/codigos/";
+		if ( !file_exists($PNG_TEMP_DIR) ) mkdir($PNG_TEMP_DIR);
+		$div='!#';
+		foreach ($etiquetas as $x => $etiqueta) 
+		{
+			$valor= $etiqueta['id'].$div.
+					$etiqueta['folio_factura'].$div.
+					$etiqueta['fecha_compra'].$div.
+					$etiqueta['insumo'].$div.
+					$etiqueta['desc_insumo'].$div.
+					$etiqueta['comprador'];
+			$filename=$PNG_TEMP_DIR.'cod'.$etiqueta['id'].'.png';
+			$imagenes[$x]=$filename;
+			$matrixPointSize = 10;
+			$errorCorrectionLevel = 'L';
+			QRcode::png($valor, $filename, $errorCorrectionLevel, $matrixPointSize, 2);
+		}
+
+		// Generar pdf con etiquetas
+		$pdf = PDF::loadView('pdf.etiqueta', ['etiqueta' => $etiquetas, 'imagen' => $imagenes]);
+		$tamanioEtiqueta = array(0,0,216,108);
+		$pdf->setPaper($tamanioEtiqueta);
+		$pdf->output();
+
+		// Guardar pdf en servidor
+		$filename = "temp_pdf_file";
+		$archivo_generado = $pdf->output();
+		file_put_contents($PNG_TEMP_DIR.$filename.".pdf", $archivo_generado);
+
+		return response()->json($filename);
+	}
+
+	public function descargarEtiquetas($archivo)
+	{
+		$el_pdf = storage_path().'/codigos/'.$archivo.'.pdf';
+		return response()->download($el_pdf);
 	}
 
 	public function eliminarEtiqueta(Request $data)
 	{
 		$user = $data->user();
 		$datos = $data->input();
-		$folio = $datos['botella'];
+		$id = $datos['botella'];
 		$motivo = $datos['motivo'];
 
-		$registro = Botella::where('folio','=',$folio)->first();
+		$registro = Botella::where('id','=',$id)->first();
 
 		$mov[0]=[
                 'almacen_id'=> $registro['almacen_id'],

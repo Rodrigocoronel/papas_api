@@ -11,7 +11,7 @@ class Botella extends Model
     // Campos de la tabla que estan disponibles para modificacion
     protected $fillable = [
         'id',
-        'folio',
+        'factura_id',
         'insumo',
         'desc_insumo',
         'fecha_compra',

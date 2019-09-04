@@ -23,7 +23,8 @@ Route::middleware(['auth:api'])->group(function ()
 
 	// Etiquetas
 	Route::post('/CargarXml',                    'controladorFacturas@cargarFactura');            // Sube archivo xml para generar etiquetas
-	Route::post('/GenerarEtiquetas',			 'controladorFacturas@imprimirEtiquetas');		  // Imprime etiquetas
+	Route::post('/GenerarEtiquetas',			 'controladorFacturas@generarEtiquetas');		  // Genera pdf con etiquetas
+	Route::post('/DescargarEtiquetas/{archivo}', 'controladorFacturas@descargarEtiquetas');		  // Descarga pdf con etiquetas
 	Route::post('/Eliminar',					 'controladorFacturas@eliminarEtiqueta');		  // Elimina una etiqueta del sistema
 
 	// Productos
