@@ -15,6 +15,7 @@ class Factura extends Model
         'folio_factura',
         'fecha_compra',
         'comprador',
+        'proveedor'
         'impreso'
     ];
 
