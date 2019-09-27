@@ -40,7 +40,10 @@ class controladorFacturas extends Controller
 			{ 
 				$factura['comprador']=$cfdiReceptor['Nombre'].'';
 			}
-
+			foreach ($xml->xpath('//cfdi:Emisor') as $cfdiEmisor)
+			{ 
+				$factura['proveedor']=$cfdiEmisor['Nombre'].'';
+			}
 			if(Factura::where('folio_factura','=',$factura['folio_factura'])->exists())
 			{
 				$impreso=1;
@@ -51,9 +54,6 @@ class controladorFacturas extends Controller
 				$noArticulos=0;
 				$articulos=$laFactura->insumosProd;
 				$impreso=$impreso;
-
-
-
 			}
 			else
 			{
@@ -126,11 +126,18 @@ class controladorFacturas extends Controller
 		// Generar registro etiquetas
 		foreach ($datos_botellas as $etiqueta) 
 		{
-			
+
+			// Empresa que compra la factura.
+			//
+			// Debe de salir de la tabla de empresa una vez que el  > > > BLADIMIR < < < lo programe.
+			//
+			$factura['comprador'] = 'PAPAS & BEER';
+
 			$etiqueta['factura_id']=$factura['id'];
 			$etiqueta['fecha_compra']=$factura['fecha_compra'];
 			$etiqueta['folio_factura']=$factura['folio_factura'];
 			$etiqueta['comprador']=$factura['comprador'];
+			$etiqueta['proveedor']=$factura['proveedor'];
 			$etiqueta['almacen_id']=1;
 			$cant = (int)($etiqueta['cantidad']);
 
