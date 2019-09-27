@@ -33,7 +33,12 @@ class Factura extends Model
 
             $output[] = [
                 'insumo'      => $movimiento->productos_rel->insumo,
-                'desc_insumo' => $movimiento->productos_rel->insumo,
+                'desc_insumo' =>$movimiento->productos_rel->desc_insumo,
+                'insumoSelect' =>  array(
+                    'label' => $movimiento->productos_rel->desc_insumo, 
+                    'id' => $movimiento->id ,  
+                    'value' => $movimiento->productos_rel->insumo 
+                ),
                 'referencia'  => '',
                 'cantidad'    => 0,
                 'max'         => $movimiento->cantidad,
