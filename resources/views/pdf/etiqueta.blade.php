@@ -97,7 +97,7 @@
 						{{ $registro['comprador'] }} <br>
 					</b>
 				</div>
-				<div class="info3 md">
+				<div class="info3 sm">
 					<b>
 						{{ $registro['desc_insumo'] }} <br>
 						{{ $registro['proveedor'] }} <br>

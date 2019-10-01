@@ -68,7 +68,8 @@ class controladorFacturas extends Controller
 						'referencia'  => $item['Descripcion'].'',
 						'cantidad'    => (int)($item['Cantidad']).'',
 						'max' 		  => (int)($item['Cantidad']).'',
-						'producto_id' => ''
+						'producto_id' => '',
+						'insumoSelect' => null,
 					];
 					$noArticulos = $noArticulos + $item['Cantidad'];
 					if($impreso == 1) $articulo['max'] = 0;
