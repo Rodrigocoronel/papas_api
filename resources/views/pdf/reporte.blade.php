@@ -26,9 +26,12 @@
 			if($fecha2 == "")     $fecha2 =     "- - - - - - -";
 			if($area == "")       $area =       "- - - - - - -";
 			if($movimiento == "") $movimiento = "- - - - - - -";
+			$image = './../storage/app/images/papaslogoonwhite.jpg';
+			$imageData = base64_encode(file_get_contents($image));
+			$src = 'data:'.mime_content_type($image).';base64,'.$imageData;
 		?>
 
-		<br> <br> <br>
+		<br><?php echo '<img src="',$src,'" alt="" height="30" width="120">'; ?>
 		<table class="general">
 			<tr>
 				<td width=35%>

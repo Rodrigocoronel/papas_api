@@ -367,7 +367,7 @@ class controladorMovimientos extends Controller
         $pdf->output();
         $dom_pdf = $pdf->getDomPDF();
         $canvas = $dom_pdf ->get_canvas();
-        $canvas->image($logo, 35, 38, 100, 32);
+        //$canvas->image($logo, 35, 38, 100, 32);
         $canvas->page_text(25, 760, "WeNatives 2019.", null, 10, array(0, 0, 0));
         $canvas->page_text(520, 760, "Página {PAGE_NUM} de {PAGE_COUNT}", null, 10, array(0, 0, 0));
         return $pdf->stream("Movimientos.pdf");

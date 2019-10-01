@@ -15,20 +15,20 @@
 			table{
 				width: 100%;
 				border-collapse: collapse;
-				table-layout: fixed;
+				
 			}
-			th.x { width: 5%; border: 2px solid; }
-			th.y { width: 5%; padding: 2px;}
-			td.x { width: 5%; border: 1px solid; }
 			.cen { text-align: center; }
+
+			.reporte { width: 100%; }
+			.reporte tr:nth-child(even) {
+				background-color: #bbbbbb;
+			}
 		</style>
 	</head>
+
 	<body>
 		<table>
 			<thead>
-				<tr>
-					@FOR($a=1;$a<=20;$a++) <th class='y'></th> @ENDFOR
-				</tr>
 				<tr>
 					<th class="y" colspan="5"> <?php echo '<img src="',$src,'" alt="" height="30" width="120">'; ?> </th>
 					<th class="y cen" colspan="10"> <h2 align="center"> REPORTE DE INVENTARIO </h2> </th>
@@ -39,9 +39,10 @@
 					<th class="y" colspan="7"> FECHA: &nbsp;{{ $fecha }}   </th>
 					<th class="y" colspan="5"> HORA:  &nbsp;{{ $hora }} hrs. </th>
 				</tr>
-				<tr>
-					<th class="y" colspan="20"> </th>
-				</tr>
+		</table>
+		<hr>
+		<table class="reporte">
+			<thead style="font-size: 14px;">
 				<tr>
 					<th class="x cen"> No. </th>
 					<th class="x cen" colspan="2"> 
@@ -60,7 +61,7 @@
 					@ENDIF
 				</tr>
 			</thead>
-			<tbody>
+			<tbody style="font-size: 12px;">
 				@FOREACH($data as $todo => $dataValues)
 					<tr>
 						<td class="x cen"> {{ $todo + 1 }}</td>
