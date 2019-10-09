@@ -1,10 +1,3 @@
-<?php
-	foreach($imagen as $index => $img)
-	{
-		$imageData = base64_encode(file_get_contents($img));
-		$imagen64[$index] = 'data:'.mime_content_type($img).';base64,'.$imageData;
-	}
-?>
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -72,9 +65,7 @@
 		@foreach($etiqueta as $index => $registro)
 			<div class="main">
 				<div class="codigo">
-					<?php 
-						echo '<img src="',$imagen64[$index],'" alt="" height="75" width="75">';
-					?>
+					<img src={{storage_path('codigos/'.$registro['id'].'.png')}} height="75" width="75"/>
 				</div>
 				<div class="titulos md">
 					<b>

@@ -124,6 +124,15 @@ class controladorFacturas extends Controller
 			$factura = Factura::where('folio_factura','=',$datos_factura['folio_factura'])->first();
 		}
 
+		// Generar carpeta de codigo QR
+		$PNG_TEMP_DIR = storage_path()."/codigos/";
+		if ( !file_exists($PNG_TEMP_DIR) ) 
+			mkdir($PNG_TEMP_DIR);
+
+
+		// separador 
+		$div='!#';
+
 		// Generar registro etiquetas
 		foreach ($datos_botellas as $etiqueta) 
 		{
@@ -154,31 +163,27 @@ class controladorFacturas extends Controller
 				];
 				$registro->movimientos()->attach($mov);
 				$etiqueta['id'] = $registro['id'];
+				
 				array_push($etiquetas,$etiqueta);
-			}
-		}
 
-		// Generar codigo QR
-		$PNG_TEMP_DIR = storage_path()."/codigos/";
-		if ( !file_exists($PNG_TEMP_DIR) ) mkdir($PNG_TEMP_DIR);
-		$div='!#';
-		foreach ($etiquetas as $x => $etiqueta) 
-		{
-			$valor= $etiqueta['id'].$div.
+				$valor= $etiqueta['id'].$div.
 					$etiqueta['folio_factura'].$div.
 					$etiqueta['fecha_compra'].$div.
 					$etiqueta['insumo'].$div.
 					$etiqueta['desc_insumo'].$div.
 					$etiqueta['comprador'];
-			$filename=$PNG_TEMP_DIR.'cod'.$etiqueta['id'].'.png';
-			$imagenes[$x]=$filename;
-			$matrixPointSize = 10;
-			$errorCorrectionLevel = 'L';
-			QRcode::png($valor, $filename, $errorCorrectionLevel, $matrixPointSize, 2);
+
+				$filename=$PNG_TEMP_DIR.$etiqueta['id'].'.png';
+				//$imagenes[$x]=$filename;
+				$matrixPointSize = 10;
+				$errorCorrectionLevel = 'L';
+				QRcode::png($valor, $filename, $errorCorrectionLevel, $matrixPointSize, 2);
+			}
 		}
+		
 
 		// Generar pdf con etiquetas
-		$pdf = PDF::loadView('pdf.etiqueta', ['etiqueta' => $etiquetas, 'imagen' => $imagenes]);
+		$pdf = PDF::loadView('pdf.etiqueta', [ 'etiqueta' => $etiquetas]);
 		$tamanioEtiqueta = array(0,0,216,108);
 		$pdf->setPaper($tamanioEtiqueta);
 		$pdf->output();
