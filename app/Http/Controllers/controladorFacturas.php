@@ -103,6 +103,7 @@ class controladorFacturas extends Controller
 	{
 		$user = $data->user();
 		$datos = $data->input();
+
 		$datos_botellas = $datos['botellas'];
 		$datos_factura = $datos['factura'];
 
@@ -154,17 +155,22 @@ class controladorFacturas extends Controller
 			for($a=0; $a < $cant; $a++)
 			{
 				unset($etiqueta['id']);
+				//guardad etiqueta
+				// return response()->json($etiqueta);
 				$registro = Botella::create($etiqueta);
+
 				$mov[0] = [
 					"almacen_id"=> 1,               // 1 - Almacen General
 					'movimiento_id' => 1,           // 1 - Primer movimiento registrado como entrada
 					'fecha'=> date('Y-m-d H:i:s'),
 					'user' => $user->id,
 				];
+
+				//registrar el primer movimiento de entrada
 				$registro->movimientos()->attach($mov);
+
+				//folio de la factura
 				$etiqueta['id'] = $registro['id'];
-				
-				array_push($etiquetas,$etiqueta);
 
 				$valor= $etiqueta['id'].$div.
 					$etiqueta['folio_factura'].$div.
@@ -173,33 +179,36 @@ class controladorFacturas extends Controller
 					$etiqueta['desc_insumo'].$div.
 					$etiqueta['comprador'];
 
+
+				//generar el codigo qr
 				$filename=$PNG_TEMP_DIR.$etiqueta['id'].'.png';
-				//$imagenes[$x]=$filename;
 				$matrixPointSize = 10;
 				$errorCorrectionLevel = 'L';
 				QRcode::png($valor, $filename, $errorCorrectionLevel, $matrixPointSize, 2);
 			}
 		}
-		
+	
+
+		return response()->json($factura->id);
+	}
+
+	public function descargarEtiquetas($factura)
+	{
+
+		//Sacar las botellas de la factura
+
+		$data = Botella::where('factura_id','=',$factura)->get();
 
 		// Generar pdf con etiquetas
-		$pdf = PDF::loadView('pdf.etiqueta', [ 'etiqueta' => $etiquetas]);
+		$pdf = PDF::loadView('pdf.etiqueta', [ 'etiqueta' => $data ]);
 		$tamanioEtiqueta = array(0,0,216,108);
 		$pdf->setPaper($tamanioEtiqueta);
 		$pdf->output();
 
-		// Guardar pdf en servidor
-		$filename = "temp_pdf_file";
-		$archivo_generado = $pdf->output();
-		file_put_contents($PNG_TEMP_DIR.$filename.".pdf", $archivo_generado);
+		// $el_pdf = storage_path().'/codigos/'.$archivo.'.pdf';
+		// return response()->download($el_pdf);
 
-		return response()->json($filename);
-	}
-
-	public function descargarEtiquetas($archivo)
-	{
-		$el_pdf = storage_path().'/codigos/'.$archivo.'.pdf';
-		return response()->download($el_pdf);
+		return $pdf->stream('botellas.pdf');
 	}
 
 	public function eliminarEtiqueta(Request $data)

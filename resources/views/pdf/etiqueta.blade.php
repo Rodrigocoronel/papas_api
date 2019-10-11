@@ -78,20 +78,20 @@
 				<div class="info md">
 					<b>
 						{{ $registro['id'] }} <br>
-						{{ $registro['folio_factura'] }} <br>
+						{{ $registro->factura->folio_factura }} <br>
 						{{ $registro['fecha_compra'] }} <br>
 						{{ $registro['insumo'] }} <br>
 					</b>
 				</div>
 				<div class="info2 md">
 					<b>
-						{{ $registro['comprador'] }} <br>
+						PAPAS & BEER <br>
 					</b>
 				</div>
 				<div class="info3 sm">
 					<b>
 						{{ $registro['desc_insumo'] }} <br>
-						{{ $registro['proveedor'] }} <br>
+						{{ $registro->factura->proveedor }} <br>
 					</b>
 				</div>
 			</div>

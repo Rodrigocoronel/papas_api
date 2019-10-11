@@ -44,6 +44,11 @@ class Botella extends Model
     {
         return $this->belongsTo('App\Almacen', 'almacen_id');
     }
+
+    public function factura()
+    {
+        return $this->belongsTo('App\Factura', 'factura_id');
+    }
         
     public function getMovimientoArrayAttribute() {
 
