@@ -197,6 +197,9 @@ class controladorFacturas extends Controller
 
 		//Sacar las botellas de la factura
 
+		ini_set('max_execution_time', 600);
+		ini_set("memory_limit",-1);
+
 		$data = Botella::where('factura_id','=',$factura)->get();
 
 		// Generar pdf con etiquetas
