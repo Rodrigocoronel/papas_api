@@ -31,19 +31,37 @@ class controladorBotellas extends Controller
     }
     
     public function botellaPorFolio($id){
+
         $registro = Botella::where('id','=',$id)->first();
+
         if($registro)
         {
-            $registro['almacen'] = $registro->almacen;
-            $array=$registro->movimientoArray;
-            usort($array,  function ( $a, $b ) { return strtotime($a['fecha']) - strtotime($b['fecha']); });
-            $registro['mov'] = $array;
+            $output = $this->build_botella($registro);
+            // $registro['almacen'] = $registro->almacen;
+            // $array=$registro->movimientoArray;
+            // usort($array,  function ( $a, $b ) { return strtotime($a['fecha']) - strtotime($b['fecha']); });
+            // $registro['mov'] = $array;
         }
         else
         {
-            $registro=false;
+            $output=false;
         }
-        return response()->json($registro);
+        return response()->json($output);
+    }
+
+    public function build_botella($item)
+    {
+        return [
+            'id' => $item->id,
+            'insumo' => $item->insumo,
+            'desc_insumo' => $item->desc_insumo,
+            'fecha_compra' => $item->fecha_compra,
+            'transito' => $item->transito,
+            'almacen' => $item->almacen,
+            'motivo' => $item->motivo,
+            'user_delete' => $item->usr_delete? $item->usr_delete->name : '',
+            'mov' => $item->movimientoArray,
+        ]; 
     }
     
     public function botellaPorCodigoDeInsumo($codigo){

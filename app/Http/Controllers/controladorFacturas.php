@@ -14,6 +14,9 @@ use App\Movimiento;
 use SimpleXMLElement;
 use DomDocument;
 use QRcode;
+use DB;
+
+use App\EtiquetaReimpresa;
 
 class controladorFacturas extends Controller
 {
@@ -39,21 +42,22 @@ class controladorFacturas extends Controller
 			foreach ($xml->xpath('//cfdi:Receptor') as $cfdiReceptor)
 			{ 
 				$factura['comprador']=$cfdiReceptor['Nombre'].'';
+				
 			}
 			foreach ($xml->xpath('//cfdi:Emisor') as $cfdiEmisor)
 			{ 
 				$factura['proveedor']=$cfdiEmisor['Nombre'].'';
+				$factura['rfc_proveedor']=$cfdiEmisor['Rfc'].'';
 			}
-			if(Factura::where('folio_factura','=',$factura['folio_factura'])->exists())
+			if(Factura::where('folio_factura','=',$factura['folio_factura'])->where('rfc_proveedor','=',$factura['rfc_proveedor'])->exists())
 			{
-				$impreso=1;
-				$laFactura = Factura::where('folio_factura','=',$factura['folio_factura'])->first();
+				$laFactura = Factura::where('folio_factura','=',$factura['folio_factura'])->where('rfc_proveedor','=',$factura['rfc_proveedor'])->first();
 
 				$error=0;
 				$factura=$laFactura;
 				$noArticulos=0;
 				$articulos=$laFactura->insumosProd;
-				$impreso=$impreso;
+				$facturaGuardada = true;
 			}
 			else
 			{
@@ -70,9 +74,8 @@ class controladorFacturas extends Controller
 						'max' 		  => (int)($item['Cantidad']).'',
 						'producto_id' => '',
 						'insumoSelect' => null,
+						'impreso' => 0,
 					];
-					$noArticulos = $noArticulos + $item['Cantidad'];
-					if($impreso == 1) $articulo['max'] = 0;
 
 					array_push($articulos, $articulo);
 				}
@@ -82,14 +85,15 @@ class controladorFacturas extends Controller
 					$error = 2; // Archivo incorrecto
 					return response()->json(['error' => $error]);
 				}
+
+				$facturaGuardada = false;
 			}
 
-			if($impreso == 1) $noArticulos = 0;
 			return response()->json([ 'error'       => $error,
 									  'factura'     => $factura,
 									  'noArticulos' => $noArticulos,
 									  'articulos'   => $articulos,
-									  'impreso'     => $impreso
+									  'facturaGuardada' => $facturaGuardada,
 			]);
 		}
 		else
@@ -99,7 +103,7 @@ class controladorFacturas extends Controller
 		}
 	}
 
-	public function generarEtiquetas(Request $data)
+	public function guardarFactura(Request $data)
 	{
 		$user = $data->user();
 		$datos = $data->input();
@@ -107,11 +111,8 @@ class controladorFacturas extends Controller
 		$datos_botellas = $datos['botellas'];
 		$datos_factura = $datos['factura'];
 
-		$etiquetas=[];
-		$registro=[];
-
 		// Generar registro de factura
-		if(!Factura::where('folio_factura','=',$datos_factura['folio_factura'])->exists())
+		if(!Factura::where('folio_factura','=',$datos_factura['folio_factura'])->where('rfc_proveedor','=',$datos_factura['rfc_proveedor'])->exists())
 		{
 			$factura = Factura::create($datos_factura);
 
@@ -119,11 +120,26 @@ class controladorFacturas extends Controller
 				$value['factura_id'] = $factura->id;
 				$new = Insumos::create($value);
 			}
+
+			$output = true;
+			$fac_out = $factura->id;
+		}else{
+			$output = false;
+			$fac_out = 0;
 		}
-		else
-		{
-			$factura = Factura::where('folio_factura','=',$datos_factura['folio_factura'])->first();
-		}
+
+		return response()->json(['error'=> $output , 'id' => $fac_out ]);
+	}
+
+	public function generarEtiquetas(Request $request){
+
+		$incoming = $request->input();
+		$user = $request->user();
+
+		$factura = $incoming['factura'];
+		$producto = $incoming['producto_id'];
+
+		$data = Insumos::where('factura_id','=',$factura)->where('producto_id','=',$producto)->get();
 
 		// Generar carpeta de codigo QR
 		$PNG_TEMP_DIR = storage_path()."/codigos/";
@@ -135,29 +151,22 @@ class controladorFacturas extends Controller
 		$div='!#';
 
 		// Generar registro etiquetas
-		foreach ($datos_botellas as $etiqueta) 
+		foreach ($data as $insumo => $insumoValue) 
 		{
 
-			// Empresa que compra la factura.
-			//
-			// Debe de salir de la tabla de empresa una vez que el  > > > BLADIMIR < < < lo programe.
-			//
-			$factura['comprador'] = 'PAPAS & BEER';
-
-			$etiqueta['factura_id']=$factura['id'];
-			$etiqueta['fecha_compra']=$factura['fecha_compra'];
-			$etiqueta['folio_factura']=$factura['folio_factura'];
-			$etiqueta['comprador']=$factura['comprador'];
-			$etiqueta['proveedor']=$factura['proveedor'];
-			$etiqueta['almacen_id']=1;
-			$cant = (int)($etiqueta['cantidad']);
-
-			for($a=0; $a < $cant; $a++)
+			for($a=0; $a < $insumoValue->cantidad; $a++)
 			{
-				unset($etiqueta['id']);
-				//guardad etiqueta
-				// return response()->json($etiqueta);
-				$registro = Botella::create($etiqueta);
+
+				$botella = [
+					'factura_id' => $insumoValue->factura_id,
+					'insumo' => $insumoValue->productos_rel->insumo,
+					'desc_insumo' => $insumoValue->productos_rel->desc_insumo,
+					'fecha_compra' => $insumoValue->factura_rel->fecha_compra,
+					'almacen_id' => 1,
+					'transito' => 0 ,
+				];
+
+				$registro = Botella::create($botella);
 
 				$mov[0] = [
 					"almacen_id"=> 1,               // 1 - Almacen General
@@ -172,12 +181,13 @@ class controladorFacturas extends Controller
 				//folio de la factura
 				$etiqueta['id'] = $registro['id'];
 
-				$valor= $etiqueta['id'].$div.
-					$etiqueta['folio_factura'].$div.
-					$etiqueta['fecha_compra'].$div.
-					$etiqueta['insumo'].$div.
-					$etiqueta['desc_insumo'].$div.
-					$etiqueta['comprador'];
+				//contenido del qr
+				$valor= $registro->id.$div.
+					$insumoValue->factura_rel->folio_factura.$div.
+					$insumoValue->factura_rel->fecha_compra.$div.
+					$insumoValue->producto_id.$div.
+					$insumoValue->productos_rel->desc_insumo.$div.
+					$insumoValue->factura_rel->comprador;
 
 
 				//generar el codigo qr
@@ -187,20 +197,23 @@ class controladorFacturas extends Controller
 				QRcode::png($valor, $filename, $errorCorrectionLevel, $matrixPointSize, 2);
 			}
 		}
-	
-
-		return response()->json($factura->id);
 	}
 
-	public function descargarEtiquetas($factura)
+	public function descargarEtiquetas($factura,$insumo,$producto)
 	{
-
-		//Sacar las botellas de la factura
-
 		ini_set('max_execution_time', 600);
 		ini_set("memory_limit",-1);
 
-		$data = Botella::where('factura_id','=',$factura)->get();
+
+		$insumirri = Insumos::where('factura_id','=',$factura)->where('producto_id','=',$producto)->first();
+
+		$insumirri->impreso = 1;
+		$insumirri->fecha_impreso = date('Y-m-d H:i:s');
+		$insumirri->save();
+
+		//Sacar las botellas de la factura
+		$data = Botella::where('factura_id','=',$factura)->where('insumo','=',$insumo)->get();
+
 
 		// Generar pdf con etiquetas
 		$pdf = PDF::loadView('pdf.etiqueta', [ 'etiqueta' => $data ]);
@@ -208,34 +221,249 @@ class controladorFacturas extends Controller
 		$pdf->setPaper($tamanioEtiqueta);
 		$pdf->output();
 
-		// $el_pdf = storage_path().'/codigos/'.$archivo.'.pdf';
-		// return response()->download($el_pdf);
-
 		return $pdf->stream('botellas.pdf');
 	}
 
 	public function eliminarEtiqueta(Request $data)
 	{
+
 		$user = $data->user();
 		$datos = $data->input();
 		$id = $datos['botella'];
 		$motivo = $datos['motivo'];
 
+		$registrado = false;
+
 		$registro = Botella::where('id','=',$id)->first();
 
-		$mov[0]=[
-                'almacen_id'=> $registro['almacen_id'],
-                'movimiento_id' => 5,
-                'fecha'=> date('Y-m-d H:i:s'),
-                'user' => $user->id,
-        ];
-        $registro->movimientos()->attach($mov);
-        $registro->transito = 5;
-        $registro->motivo = $motivo;
-        $registro->save();
+		if($registro->transito != 5){
+			$mov[0]=[
+	                'almacen_id'=> $registro['almacen_id'],
+	                'movimiento_id' => 5,
+	                'fecha'=> date('Y-m-d H:i:s'),
+	                'user' => $user->id,
+	        ];
+	        $registro->movimientos()->attach($mov);
+	        $registro->transito = 5;
+	        $registro->motivo = $motivo;
+	        $registro->user_delete = $user->id;
+	        $registro->save();
 
-		$registrado = true;
-		return response()->json(['registrado' => $registrado, 'registro' => $registro]);
+			$registrado = true;
+		}
+
+		$output = $this->build_botella($registro);
+
+		return response()->json(['registrado' => $registrado, 'botella' => $output ]);
 	}
+
+	public function new_bottle(Request $request)
+    {
+
+    	ini_set('max_execution_time', 600);
+		ini_set("memory_limit",-1);
+
+        $data = $request->input();
+        $user = $request->user();
+
+		$botella_antigua = Botella::find($data['botella']);
+
+		$botella = [
+			'factura_id' => $botella_antigua->factura_id,
+			'insumo' => $botella_antigua->insumo,
+			'desc_insumo' => $botella_antigua->desc_insumo,
+			'fecha_compra' => $botella_antigua->fecha_compra,
+			'almacen_id' => 1,
+			'transito' => 0 ,
+		];
+
+		$new = Botella::create($botella);
+
+		$mov[0] = [
+			"almacen_id"=> 1,               // 1 - Almacen General
+			'movimiento_id' => 1,           // 1 - Primer movimiento registrado como entrada
+			'fecha'=> date('Y-m-d H:i:s'),
+			'user' => $user->id,
+		];
+
+		//registrar el primer movimiento de entrada
+		$new->movimientos()->attach($mov);
+
+		//registro de log en que id se cambio la botella
+
+		$logs = EtiquetaReimpresa::create([
+			'destruida_id' => $botella_antigua->id,
+        	'nueva_id' => $new->id,
+        	'user_id' => $user->id
+		]);
+
+		$to_pdf = Botella::where('id','=',$new->id)->get();
+
+
+		// Generar pdf con etiquetas
+		$pdf = PDF::loadView('pdf.etiqueta', [ 'etiqueta' => $to_pdf ]);
+		$tamanioEtiqueta = array(0,0,216,108);
+		$pdf->setPaper($tamanioEtiqueta);
+		$pdf->output();
+
+		return $pdf->stream('botellas.pdf');
+
+    }
+
+	 public function build_botella($item)
+    {
+        return [
+            'id' => $item->id,
+            'insumo' => $item->insumo,
+            'desc_insumo' => $item->desc_insumo,
+            'fecha_compra' => $item->fecha_compra,
+            'transito' => $item->transito,
+            'almacen' => $item->almacen,
+            'motivo' => $item->motivo,
+            'user_delete' => $item->usr_delete? $item->usr_delete->name : '',
+            'mov' => $item->movimientoArray,
+        ]; 
+    }
+
+	/**
+     * Get all the data;
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $output = [];
+
+        $lista = Factura::lista([
+            'folio_factura'    => isset($_GET["folio_factura"]) ? $_GET["folio_factura"] : null,
+            'proveedor'    => isset($_GET["proveedor"]) ? $_GET["proveedor"] : null,
+            'rfc'    => isset($_GET["rfc"]) ? $_GET["rfc"] : null,
+            'fecha_compra'  => isset($_GET["fecha_compra"]) ? $_GET["fecha_compra"] : null,
+
+            'take'     => isset($_GET["take"]) ? $_GET["take"] : null,                     
+            'skip'    => isset($_GET["skip"]) ? $_GET["skip"] : null,
+        ])->get();
+
+        $conteo = Factura::conteo([
+            'folio_factura'    => isset($_GET["folio_factura"]) ? $_GET["folio_factura"] : null,
+            'proveedor'    => isset($_GET["proveedor"]) ? $_GET["proveedor"] : null,
+            'rfc'    => isset($_GET["rfc"]) ? $_GET["rfc"] : null,
+            'fecha_compra'  => isset($_GET["fecha_compra"]) ? $_GET["fecha_compra"] : null,
+        ])->get();
+
+        $output = $lista->transform(function($item){
+            return $this->build_factura($item);
+        });
+
+        return response()->json(['datos'=>$output,'total'=> count($conteo)]);
+    }
+
+    public function build_factura($item)
+    {
+    	return [
+    		'id' => $item->id,
+    		'folio_factura' => $item->folio_factura,
+    		'proveedor' => $item->proveedor,
+    		'fecha_compra' => $item->fecha_compra,
+    		'rfc_proveedor' => $item->rfc_proveedor
+    	];
+    }
+
+    public function facturas_insumos($factura)
+    {
+    	$output = [];
+
+    	$data = Factura::find($factura);
+
+    	return response()->json($data->insumosProd);
+    	
+    }
+
+    public function etiquetas_eliminadas()
+    {
+    	$take = isset($_GET["take"]) ? $_GET["take"] : null;                    
+        $skip = isset($_GET["skip"]) ? $_GET["skip"] : null;
+
+        $fecha1 = isset($_GET["fecha1"]) ? $_GET["fecha1"] : null;                    
+        $fecha2 = isset($_GET["fecha2"]) ? $_GET["fecha2"] : null; 
+
+        $data= DB::table('etiquetas_reimpresas')
+        	->select('etiquetas_reimpresas.*','botella.desc_insumo','users.name')
+        	->orderby('created_at','desc')
+        	->join('botella','etiquetas_reimpresas.destruida_id','botella.id')
+        	->join('users','etiquetas_reimpresas.user_id','users.id')
+        	->where(function($query) use($fecha1,$fecha2) {
+
+	     	if($fecha1 != '' && $fecha2 != '')
+	        	$query->whereBetween('etiquetas_reimpresas.created_at',[$fecha1.' 00:00:00' , $fecha2.' 23:59:59']);
+
+	        if($fecha1 != '' && $fecha2 == '')
+	        	$query->whereBetween('etiquetas_reimpresas.created_at',[$fecha1.' 00:00:00' , $fecha1.' 23:59:59']);
+
+	     })->take($take)->skip($skip)->get();
+
+    	// $data = EtiquetaReimpresa::orderby('created_at','desc')->take($take)->skip($skip)->get();
+
+    	$total = DB::table('etiquetas_reimpresas')
+    		->select(DB::raw('count(id) as total'))
+    		->where(function($query) use($fecha1,$fecha2) {
+
+	     	if($fecha1 != '' && $fecha2 != '')
+	        	$query->whereBetween('etiquetas_reimpresas.created_at',[$fecha1.' 00:00:00' , $fecha2.' 23:59:59']);
+
+	        if($fecha1 != '' && $fecha2 == '')
+	        	$query->whereBetween('etiquetas_reimpresas.created_at',[$fecha1.' 00:00:00' , $fecha1.' 23:59:59']);
+
+	    })->get();
+
+    	$output = $data->transform(function($item){
+    		return $this->build_etiqueta_eliminada($item);
+    	});
+
+    	return response()->json([ 
+    		'datos' => $output ,
+    		'total' => $total
+    	]);
+    }
+
+    public function build_etiqueta_eliminada($item)
+    {
+    	return [
+    		'desc_insumo' => $item->desc_insumo,
+    		'destruida_id' => $item->destruida_id,
+    		'nueva_id' => $item->nueva_id,
+    		'fecha' => $item->created_at  ,
+    		'usuario' => $item->name
+    	];
+    }
+
+    public function reporteEtiquetasEliminadas()
+    {
+    	$fecha1 = isset($_GET["fecha1"]) ? $_GET["fecha1"] : null;                    
+        $fecha2 = isset($_GET["fecha2"]) ? $_GET["fecha2"] : null; 
+
+        $data= DB::table('etiquetas_reimpresas')
+        	->select('etiquetas_reimpresas.*','botella.desc_insumo','users.name')
+        	->orderby('created_at','desc')
+        	->join('botella','etiquetas_reimpresas.destruida_id','botella.id')
+        	->join('users','etiquetas_reimpresas.user_id','users.id')
+        	->where(function($query) use($fecha1,$fecha2) {
+
+	     	if($fecha1 != '' && $fecha2 != '')
+	        	$query->whereBetween('etiquetas_reimpresas.created_at',[$fecha1.' 00:00:00' , $fecha2.' 23:59:59']);
+
+	        if($fecha1 != '' && $fecha2 == '')
+	        	$query->whereBetween('etiquetas_reimpresas.created_at',[$fecha1.' 00:00:00' , $fecha1.' 23:59:59']);
+
+	     })->get();
+
+        $pdf = PDF::loadView('pdf.Et_reimpresa', ['fecha1'=>$fecha1, 'fecha2'=>$fecha2, 'data' => $data] );
+        $pdf->setPaper('letter');
+        $pdf->output();
+
+
+        return $pdf->stream("reimpresas.pdf");
+
+    }
 
 }

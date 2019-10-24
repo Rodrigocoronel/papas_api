@@ -16,16 +16,17 @@ class Botella extends Model
         'desc_insumo',
         'fecha_compra',
         'almacen_id',
-        'transito'
+        'transito',
+        'user_delete',
     ];
 
     // Campos de la tabla no visibles para el usuario
     protected $hidden = [];
     
-    public function movimienPorBotella()
-    {
-        return $this->hasMany('App\Movimiento');
-    }
+    // public function movimienPorBotella()
+    // {
+    //     return $this->hasMany('App\Movimiento');
+    // }
     
     public function movimientos() {
         return $this->belongsToMany(
@@ -37,12 +38,17 @@ class Botella extends Model
             'movimiento_id',
             'fecha',
             'user'
-        );
+        )->orderBy('fecha', 'asc');;
     }
     
     public function almacen()
     {
         return $this->belongsTo('App\Almacen', 'almacen_id');
+    }
+
+    public function usr_delete()
+    {
+        return $this->belongsTo('App\User', 'user_delete');
     }
 
     public function factura()

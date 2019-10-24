@@ -14,7 +14,8 @@ class Insumos extends Model
         'id',
         'factura_id',
         'producto_id',
-        'cantidad'
+        'cantidad',
+        'fecha_impreso'
     ];
 
     // Campos de la tabla no visibles para el usuario
@@ -24,6 +25,10 @@ class Insumos extends Model
 
     public function productos_rel() {
         return $this->belongsTo('App\Producto','producto_id','id');
+    }
+
+    public function factura_rel() {
+        return $this->belongsTo('App\Factura','factura_id','id');
     }
     
 }

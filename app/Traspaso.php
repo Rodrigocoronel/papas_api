@@ -48,8 +48,7 @@ class Traspaso extends Model
         foreach ($this->contenido_traspaso as $item) {
            
             $output[] = [
-                'id'  => $item->id,
-                'folio' => $item->folio,
+                'id'  => $item->botella_id,
                 'movimiento_id' => $item->movimiento_id,
                 'desc_insumo' => $item->desc
             ];

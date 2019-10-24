@@ -23,9 +23,12 @@ Route::middleware(['auth:api'])->group(function ()
 
 	// Etiquetas
 	Route::post('/CargarXml',                    'controladorFacturas@cargarFactura');            // Sube archivo xml para generar etiquetas
-	Route::post('/GenerarEtiquetas',			 'controladorFacturas@generarEtiquetas');		  // Genera pdf con etiquetas
-	Route::post('/DescargarEtiquetas/{archivo}', 'controladorFacturas@descargarEtiquetas');		  // Descarga pdf con etiquetas
+	Route::post('guardar_factura', 			 	 'controladorFacturas@guardarFactura');		  // Guardar la factura
+ 	Route::post('/GenerarEtiquetas',			 'controladorFacturas@generarEtiquetas');		  // Genera pdf con etiquetas
+	Route::post('/DescargarEtiquetas/{factura}/{insumo}/{producto}', 'controladorFacturas@descargarEtiquetas');		  // Descarga pdf con etiquetas
 	Route::post('/Eliminar',					 'controladorFacturas@eliminarEtiqueta');		  // Elimina una etiqueta del sistema
+	Route::get('/facturas','controladorFacturas@index');
+	Route::get('/factura_insumos/{factura_id}','controladorFacturas@facturas_insumos');
 
 	// Productos
 	Route::get( '/Producto/{id}',                'controladorProductos@productoPorCodigo');           // Buscar almacen
@@ -37,6 +40,9 @@ Route::middleware(['auth:api'])->group(function ()
 	Route::get( '/Botellas/{insumo}',            'controladorBotellas@botellaPorCodigoDeInsumo'); // Encontrar Por numero de insumo
 	Route::get( '/NombreBotellas/{desc}',        'controladorBotellas@botellasPorNombre');        // Encontrar Por descripcion
 	Route::get( '/Botellas',                     'controladorBotellas@todasLasBotellas');         // Listar todas
+	Route::post('/descargar_new' , 'controladorFacturas@new_bottle');
+	Route::get('/etiquetas_eliminadas' , 'controladorFacturas@etiquetas_eliminadas');
+	Route::get('/reporteEtiquetasEliminadas','controladorFacturas@reporteEtiquetasEliminadas');
 
 	// Almacenes
 	Route::post('/AlmacenNuevo',                 'controladorAlmacenes@registrarAlmacen');        // Registrar almacen

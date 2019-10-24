@@ -16,7 +16,8 @@ class Factura extends Model
         'fecha_compra',
         'comprador',
         'proveedor',
-        'impreso'
+        'impreso',
+        'rfc_proveedor'
     ];
 
     // Campos de la tabla no visibles para el usuario
@@ -35,19 +36,65 @@ class Factura extends Model
             $output[] = [
                 'insumo'      => $movimiento->productos_rel->insumo,
                 'desc_insumo' =>$movimiento->productos_rel->desc_insumo,
+
                 'insumoSelect' =>  array(
                     'label' => $movimiento->productos_rel->desc_insumo, 
                     'id' => $movimiento->id ,  
                     'value' => $movimiento->productos_rel->insumo 
                 ),
-                'referencia'  => '',
-                'cantidad'    => 0,
-                'max'         => $movimiento->cantidad,
-                'producto_id' => $movimiento->id
 
+                'referencia'  => '',
+                'cantidad'    => $movimiento->cantidad,
+                'max'         => $movimiento->cantidad,
+                'producto_id' => $movimiento->producto_id,
+                'impreso' => $movimiento->impreso,
+                'fecha_impreso' => $movimiento->fecha_impreso,
             ];
         }
         return $output;
+    }
+
+
+    public function scopeLista($query, $params=[]) { 
+
+        if( isset($params['folio_factura']) && $params['folio_factura'] != null )
+            $query->where('folio_factura', 'like', "%".$params['folio_factura']."%");
+
+        if( isset($params['proveedor']) && $params['proveedor'] != null )
+            $query->where('proveedor', 'like', "%".$params['proveedor']."%");
+
+        if( isset($params['fecha_compra']) && $params['fecha_compra'] != null )
+            $query->where('fecha_compra', 'like', "%".$params['fecha_compra']."%");
+
+        if( isset($params['rfc']) && $params['rfc'] != null )
+            $query->where('rfc_proveedor', 'like', "%".$params['rfc']."%");
+
+
+
+        $query->take($params['take']);
+        $query->skip($params['skip']);
+       
+
+        return $query;
+    
+    }
+
+    public function scopeConteo($query, $params=[]) { 
+
+        if( isset($params['folio_factura']) && $params['folio_factura'] != null )
+            $query->where('folio_factura', 'like', "%".$params['folio_factura']."%");
+
+        if( isset($params['proveedor']) && $params['proveedor'] != null )
+            $query->where('proveedor', 'like', "%".$params['proveedor']."%");
+
+        if( isset($params['fecha_compra']) && $params['fecha_compra'] != null )
+            $query->where('fecha_compra', 'like', "%".$params['fecha_compra']."%");
+
+        if( isset($params['rfc']) && $params['rfc'] != null )
+            $query->where('rfc_proveedor', 'like', "%".$params['rfc']."%");
+
+        return $query;
+    
     }
     
 }

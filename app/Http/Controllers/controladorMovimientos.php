@@ -47,7 +47,7 @@ class controladorMovimientos extends Controller
                         $registrado = true;
                         
                         $dato=[
-                            'id' => $data['folio'],
+                            'folio' => $data['folio'],
                             'movimiento_id' => $data['movimiento_id'],
                             'desc_insumo' => $registro['desc_insumo'],
                         ];
@@ -59,7 +59,7 @@ class controladorMovimientos extends Controller
                     $admin_user = User::where('tarjeta','=',$data['tarjeta'])->first();
 
                     if(!empty($admin_user)){
-                        if($admin_user->tipo == 3){
+                        if($admin_user->tipo == 3 || $admin_user->tipo == 1){
                             if( $registro->almacen_id == $data['almacen_id'] ){
                                 $mov[0]=[
                                     'almacen_id'=> $data['almacen_id'],
@@ -80,6 +80,7 @@ class controladorMovimientos extends Controller
                                     $motivo = $data['motivo'];
                                 }
                                 $registro->motivo = $motivo;
+                                $registro->user_delete = $admin_user->id;
                                 $registro->save();
 
                                 $registrado = true;
@@ -180,7 +181,7 @@ class controladorMovimientos extends Controller
                     $admin_user = User::where('tarjeta','=',$data['tarjeta'])->first();
 
                     if(!empty($admin_user)){
-                        if($admin_user->tipo == 3){
+                        if($admin_user->tipo == 3 || $admin_user->tipo == 1){
                             if( ( $registro->transito == 4 || $registro->transito == 6 ) && ($registro->almacen_id == $data['almacen_id']) )
                             {
                                 $mov[0]=[
@@ -197,7 +198,7 @@ class controladorMovimientos extends Controller
                                 
                                 $registrado = true;
                                 $dato=[
-                                    'folio' =>$registro->folio,
+                                    'folio' =>$registro->id,
                                     'movimiento_id' => $registro->movimiento_id,
                                     'desc_insumo' => $registro['desc_insumo'],
                                 ];
@@ -405,7 +406,7 @@ class controladorMovimientos extends Controller
             return $this->GenerarReporteDeInventario($datos);
         });
 
-        return response()->json(['botellas'=>$reporte,'total'=>$conteo[0]['total'] ]);
+        return response()->json(['botellas'=>$reporte,'total'=>isset($conteo[0])? $conteo[0]['total'] : 0 ]);
     }
 
      public function inventarioPDF($area,$desglosar){

@@ -28,6 +28,11 @@ class Movimiento extends Model
         return $this->belongsTo('App\Almacen', 'almacen_id');
     }
 
+    public function user_transaction()
+    {
+        return $this->belongsTo('App\User', 'user');
+    }
+
     public function destino()
     {
         return $this->belongsTo('App\Almacen', 'almacen_id');

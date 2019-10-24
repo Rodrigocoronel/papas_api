@@ -43,4 +43,5 @@ class controladorProductos extends Controller
 
         return response()->json($lista);
     }
+
 }
