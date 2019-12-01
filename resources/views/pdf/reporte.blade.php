@@ -31,7 +31,7 @@
 			$src = 'data:'.mime_content_type($image).';base64,'.$imageData;
 		?>
 
-		<br><?php echo '<img src="',$src,'" alt="" height="30" width="120">'; ?>
+		<br><img style="position: relative;" src={{storage_path('app/images/papaslogoonwhite.jpg')}} height="30" width="120"/>
 		<table class="general">
 			<tr>
 				<td width=35%>

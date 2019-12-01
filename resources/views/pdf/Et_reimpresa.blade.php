@@ -29,7 +29,8 @@
 				<tr>
 					<th class="">Descripción de insumo</th>
 					<th class="">Folio Eliminado</th>
-					<th class="">Folio Nuevo</th> 
+					<th class="">Folio Nuevo</th>
+					<th>Motivo</th> 
 					<th class="">Fecha</th>
 					<th class="">Usuario</th> 
 				</tr>
@@ -40,6 +41,7 @@
 						<td>{{ $valueBotella->desc_insumo }}</td>
 						<td>{{ $valueBotella->destruida_id }}</td>
 						<td>{{ $valueBotella->nueva_id }}</td>
+						<td>{{ $valueBotella->motivo}}</td>
 						<td>{{ $valueBotella->created_at }}</td>
 						<td>{{ $valueBotella->name }}</td>
 					</tr>

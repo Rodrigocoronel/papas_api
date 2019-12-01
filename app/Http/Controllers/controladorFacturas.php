@@ -299,6 +299,24 @@ class controladorFacturas extends Controller
 
 		$to_pdf = Botella::where('id','=',$new->id)->get();
 
+		// separador 
+		$div='!#';
+
+		//contenido del qr
+		$valor= $new->id.$div.
+		$new->factura->folio_factura.$div.
+		$new->factura->fecha_compra.$div.
+		'0'.$div.
+		$new->desc_insumo.$div.
+		$new->factura->comprador;
+
+		$PNG_TEMP_DIR = storage_path()."/codigos/";
+
+		//generar el codigo qr
+		$filename=$PNG_TEMP_DIR.$new->id.'.png';
+		$matrixPointSize = 10;
+		$errorCorrectionLevel = 'L';
+		QRcode::png($valor, $filename, $errorCorrectionLevel, $matrixPointSize, 2);
 
 		// Generar pdf con etiquetas
 		$pdf = PDF::loadView('pdf.etiqueta', [ 'etiqueta' => $to_pdf ]);
@@ -339,7 +357,8 @@ class controladorFacturas extends Controller
             'proveedor'    => isset($_GET["proveedor"]) ? $_GET["proveedor"] : null,
             'rfc'    => isset($_GET["rfc"]) ? $_GET["rfc"] : null,
             'fecha_compra'  => isset($_GET["fecha_compra"]) ? $_GET["fecha_compra"] : null,
-
+            'fecha1'  => isset($_GET["fecha1"]) ? $_GET["fecha1"] : null,
+            'fecha2'  => isset($_GET["fecha2"]) ? $_GET["fecha2"] : null,
             'take'     => isset($_GET["take"]) ? $_GET["take"] : null,                     
             'skip'    => isset($_GET["skip"]) ? $_GET["skip"] : null,
         ])->get();
@@ -348,6 +367,8 @@ class controladorFacturas extends Controller
             'folio_factura'    => isset($_GET["folio_factura"]) ? $_GET["folio_factura"] : null,
             'proveedor'    => isset($_GET["proveedor"]) ? $_GET["proveedor"] : null,
             'rfc'    => isset($_GET["rfc"]) ? $_GET["rfc"] : null,
+            'fecha1'  => isset($_GET["fecha1"]) ? $_GET["fecha1"] : null,
+            'fecha2'  => isset($_GET["fecha2"]) ? $_GET["fecha2"] : null,
             'fecha_compra'  => isset($_GET["fecha_compra"]) ? $_GET["fecha_compra"] : null,
         ])->get();
 
@@ -443,7 +464,7 @@ class controladorFacturas extends Controller
         $fecha2 = isset($_GET["fecha2"]) ? $_GET["fecha2"] : null; 
 
         $data= DB::table('etiquetas_reimpresas')
-        	->select('etiquetas_reimpresas.*','botella.desc_insumo','users.name')
+        	->select('etiquetas_reimpresas.*','botella.desc_insumo','users.name','botella.motivo')
         	->orderby('created_at','desc')
         	->join('botella','etiquetas_reimpresas.destruida_id','botella.id')
         	->join('users','etiquetas_reimpresas.user_id','users.id')
@@ -464,6 +485,62 @@ class controladorFacturas extends Controller
 
         return $pdf->stream("reimpresas.pdf");
 
+    }
+
+    public function reporte_impresas($fecha1){
+
+    	$data = [];
+
+    	 $fecha2 = isset($_GET["fecha2"]) ? $_GET["fecha2"] : ''; 
+
+    	if($fecha1 != '' && $fecha2 != ''){
+
+	    	$data = Factura::whereBetween('created_at' , [ $fecha1.' 00:00:00' , $fecha2.' 23:59:00'])->get();
+    	}
+
+    	if($fecha1 != '' && $fecha2 == ''){
+
+    		$data = Factura::whereBetween('created_at',[ $fecha1.' 00:00:00' , $fecha1.' 23:59:59'])->get();
+    	}
+
+    	$kek = [];
+
+    	foreach ($data as $key => $value) {
+
+    		// $temp = Botella::select('min(id) as lel',' max(id) as lul')->where('factura_id','=',$value->id)->get();
+
+    		$temp = DB::select("SELECT  min(botella.id) as minimo,
+    			max(botella.id) as maximo, 
+    			facturas.folio_factura as folio_factura, 
+    			botella.insumo, facturas.created_at as fecha_impreso,
+    			facturas.fecha_compra as fecha_compra,
+    			facturas.proveedor as proveedor,
+    			count(botella.id) as cantidad
+
+    			FROM botella
+
+    			join facturas on facturas.id = botella.factura_id
+
+        		where botella.factura_id = ?
+
+        		group by insumo
+
+        		", [$value->id]);
+
+    		foreach ($temp as $asd => $valueTem) {
+    			array_push($kek, $valueTem);
+    		}
+
+    		
+    	}
+
+    	$pdf = PDF::loadView('pdf.facturaimpresa', ['fecha1'=>$fecha1, 'fecha2'=>$fecha2, 'data' => $kek] );
+        $pdf->setPaper('letter');
+        $pdf->output();
+
+
+        return $pdf->stream("impresas.pdf");
+    	return response()->json( $kek );
     }
 
 }

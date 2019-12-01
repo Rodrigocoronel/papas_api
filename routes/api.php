@@ -33,6 +33,10 @@ Route::middleware(['auth:api'])->group(function ()
 	// Productos
 	Route::get( '/Producto/{id}',                'controladorProductos@productoPorCodigo');           // Buscar almacen
 	Route::get( '/Productos',                    'controladorProductos@todosLosProductos');       // Mostrar todos los almacenes
+	Route::get('/productos_list','controladorProductos@index');
+	Route::get('/producto_id/{id}', 'controladorProductos@producto_edit');
+	Route::post('/prod','controladorProductos@save');
+	Route::post('/edit_prod','controladorProductos@update');
 
 	// Botellas
 	Route::post('/BotellaNueva',                 'controladorBotellas@registrarBotella');         // Registrar nueva botella
@@ -66,3 +70,4 @@ Route::get('/reporteDeTraspaso/{traspaso}','controladorMovimientos@generarReport
 //Route::get('/reporteDeBusqueda','controladorMovimientos@imprimirReporteDeBusqueda'); 			 // Pfd para reporte de traspasos
 Route::get('/reporte_de_busqueda','controladorMovimientos@imprimirReporteDeBusqueda'); 			 // Pfd para reporte de busquedas
 Route::get( '/PdfInventario/{area}/{desglosar}','controladorMovimientos@inventarioPDF');	 // Inventario de botellas por area
+Route::get('/reporte_impresas/{fecha1}','controladorFacturas@reporte_impresas');

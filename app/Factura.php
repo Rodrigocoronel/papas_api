@@ -27,6 +27,10 @@ class Factura extends Model
         return $this->hasMany('App\Insumos','factura_id','id');
     }
 
+    public function bottles() {
+        return $this->hasMany('App\Botella','factura_id','id');
+    }    
+
     public function getInsumosProdAttribute() {
 
         $output = [];
@@ -69,7 +73,11 @@ class Factura extends Model
         if( isset($params['rfc']) && $params['rfc'] != null )
             $query->where('rfc_proveedor', 'like', "%".$params['rfc']."%");
 
+        if( $params['fecha1'] != '' && $params['fecha2'] != '')
+            $query->whereBetween('created_at',[ $params['fecha1'].' 00:00:00' , $params['fecha2'].' 23:59:00']);
 
+        if( $params['fecha1'] != '' && $params['fecha2'] == '' )
+            $query->whereBetween('created_at',[ $params['fecha1'].' 00:00:00' , $params['fecha1'].' 23:59:59']);
 
         $query->take($params['take']);
         $query->skip($params['skip']);
@@ -93,8 +101,15 @@ class Factura extends Model
         if( isset($params['rfc']) && $params['rfc'] != null )
             $query->where('rfc_proveedor', 'like', "%".$params['rfc']."%");
 
+        if( $params['fecha1'] != '' && $params['fecha2'] != '')
+            $query->whereBetween('created_at',[ $params['fecha1'].' 00:00:00' , $params['fecha2'].' 23:59:00']);
+
+        if( $params['fecha1'] != '' && $params['fecha2'] == '' )
+            $query->whereBetween('created_at',[ $params['fecha1'].' 00:00:00' , $params['fecha1'].' 23:59:59']);
+
         return $query;
     
     }
+
     
 }

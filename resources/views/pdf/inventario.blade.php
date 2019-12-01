@@ -1,8 +1,3 @@
-<?php
-	$image = './../storage/app/images/papaslogoonwhite.jpg';
-	$imageData = base64_encode(file_get_contents($image));
-	$src = 'data:'.mime_content_type($image).';base64,'.$imageData;
-?>
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -30,7 +25,9 @@
 		<table>
 			<thead>
 				<tr>
-					<th class="y" colspan="5"> <?php echo '<img src="',$src,'" alt="" height="30" width="120">'; ?> </th>
+					<th class="y" colspan="5">  
+						<img style="position: relative;" src={{storage_path('app/images/papaslogoonwhite.jpg')}} height="30" width="120"/>
+					</th>
 					<th class="y cen" colspan="10"> <h2 align="center"> REPORTE DE INVENTARIO </h2> </th>
 					<th class="y" colspan="5"> </th>
 				</tr>
