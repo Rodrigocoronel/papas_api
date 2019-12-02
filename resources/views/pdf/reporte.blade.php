@@ -26,9 +26,6 @@
 			if($fecha2 == "")     $fecha2 =     "- - - - - - -";
 			if($area == "")       $area =       "- - - - - - -";
 			if($movimiento == "") $movimiento = "- - - - - - -";
-			$image = './../storage/app/images/papaslogoonwhite.jpg';
-			$imageData = base64_encode(file_get_contents($image));
-			$src = 'data:'.mime_content_type($image).';base64,'.$imageData;
 		?>
 
 		<br><img style="position: relative;" src={{storage_path('app/images/papaslogoonwhite.jpg')}} height="30" width="120"/>

@@ -286,7 +286,7 @@ class controladorMovimientos extends Controller
             'fecha' =>         $datos->fecha,
             'movimiento_id' => $datos->movimiento_id,
             'botella_id' =>    $datos->botella_id,
-            'botella_desc' =>  $datos->botella->desc_insumo,
+            'botella_desc' =>  $datos->botella['desc_insumo'],
             'almacen_id' =>    $datos->almacen->nombre,
         ];
     }

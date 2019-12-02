@@ -15,7 +15,8 @@ class Insumos extends Model
         'factura_id',
         'producto_id',
         'cantidad',
-        'fecha_impreso'
+        'fecha_impreso',
+        'impreso'
     ];
 
     // Campos de la tabla no visibles para el usuario
