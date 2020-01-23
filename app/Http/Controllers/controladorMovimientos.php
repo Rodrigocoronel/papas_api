@@ -2,131 +2,126 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Database\Query\Expression as Expression;
-use PDF;
-
-use App\Movimiento;
+use App\Almacen;
 use App\Botella;
+use App\Movimiento;
 use App\Traspaso;
 use App\User;
-use App\Almacen;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use PDF;
 
 class controladorMovimientos extends Controller
 {
-    public function registrarMovimiento(Request $datos){
-        
-        $user = $datos->user();
-        $data = $datos->input();
-        $dato = [];
-        $ubicacion = [];
-        
-        $registrado = false;
-        if(Botella::where('id','=',$data['folio'])->exists())
-        {
-            $registro = Botella::where('id','=',$data['folio'])->first();
+    public function registrarMovimiento(Request $datos)
+    {
 
-            switch($data['movimiento_id'])
-            {
+        $user      = $datos->user();
+        $data      = $datos->input();
+        $dato      = [];
+        $ubicacion = [];
+
+        $registrado = false;
+        if (Botella::where('id', '=', $data['folio'])->exists()) {
+            $registro = Botella::where('id', '=', $data['folio'])->first();
+
+            switch ($data['movimiento_id']) {
                 case "1": // Entrada - El producto debe estar en transito = 0 (en transito)
-                    if($registro->transito == '1' || $registro->transito == '6')
-                    {
-                        $mov[0]=[
-                            'almacen_id'=> $data['almacen_id'],
+                    if ($registro->transito == '1' || $registro->transito == '6') {
+                        $mov[0] = [
+                            'almacen_id'    => $data['almacen_id'],
                             'movimiento_id' => $data['movimiento_id'],
-                            'fecha'=> date('Y-m-d H:i:s'),
-                            'user' => $user->id,
+                            'fecha'         => date('Y-m-d H:i:s'),
+                            'user'          => $user->id,
                         ];
                         $registro->movimientos()->attach($mov);
 
                         $registro->almacen_id = $data['almacen_id'];
-                        $registro->transito = 0;
+                        $registro->transito   = 0;
                         $registro->save();
-            
+
                         $registrado = true;
-                        
-                        $dato=[
-                            'folio' => $data['folio'],
+
+                        $dato = [
+                            'folio'         => $data['folio'],
                             'movimiento_id' => $data['movimiento_id'],
-                            'desc_insumo' => $registro['desc_insumo'],
+                            'desc_insumo'   => $registro['desc_insumo'],
                         ];
                     }
-                break;
+                    break;
                 case "5": // Baja - Almacen del que sale debe ser igual a Almacen_actual
                     // *** Hacer que el articulo no se pueda regresar ***
-                    
-                    $admin_user = User::where('tarjeta','=',$data['tarjeta'])->first();
 
-                    if(!empty($admin_user)){
-                        if($admin_user->tipo == 3 || $admin_user->tipo == 1){
-                            if( $registro->almacen_id == $data['almacen_id'] ){
-                                $mov[0]=[
-                                    'almacen_id'=> $data['almacen_id'],
+                    $admin_user = User::where('tarjeta', '=', $data['tarjeta'])->first();
+
+                    if (!empty($admin_user)) {
+                        if ($admin_user->tipo == 3 || $admin_user->tipo == 1) {
+                            if ($registro->almacen_id == $data['almacen_id']) {
+                                $mov[0] = [
+                                    'almacen_id'    => $data['almacen_id'],
                                     'movimiento_id' => $data['movimiento_id'],
-                                    'fecha'=> date('Y-m-d H:i:s'),
-                                    'user' => $user->id,
+                                    'fecha'         => date('Y-m-d H:i:s'),
+                                    'user'          => $user->id,
                                 ];
                                 $registro->movimientos()->attach($mov);
-                                
-                                $data['transito'] = 5;                                
+
+                                $data['transito']     = 5;
                                 $registro->almacen_id = $data['almacen_id'];
-                                $registro->transito = $data['transito'];
-                                if($data['motivo'] == '1'){
+                                $registro->transito   = $data['transito'];
+                                if ($data['motivo'] == '1') {
                                     $motivo = 'Quebrada';
-                                }else if($data['motivo'] == '2'){
+                                } else if ($data['motivo'] == '2') {
                                     $motivo = 'En mal estado';
-                                }else{
+                                } else {
                                     $motivo = $data['motivo'];
                                 }
-                                $registro->motivo = $motivo;
+                                $registro->motivo      = $motivo;
                                 $registro->user_delete = $admin_user->id;
                                 $registro->save();
 
                                 $registrado = true;
-                                $dato=[
-                                    'folio' =>$data['folio'],
+                                $dato       = [
+                                    'folio'         => $data['folio'],
                                     'movimiento_id' => $data['movimiento_id'],
-                                    'desc_insumo' => $registro['desc_insumo'],
+                                    'desc_insumo'   => $registro['desc_insumo'],
                                 ];
                             }
                         }
                     }
-                   
+
                     break;
-                case "4": // Venta 
-                    if( $registro->almacen_id == $data['almacen_id'] && $registro->transito == '0' && $registro->almacen_id > 2)
-                    {
-                        $mov[0]=[
-                            'almacen_id'=> $data['almacen_id'],
+                case "4": // Venta
+                    if ($registro->almacen_id == $data['almacen_id'] && $registro->transito == '0' && $registro->almacen_id > 2) {
+                        $mov[0] = [
+                            'almacen_id'    => $data['almacen_id'],
                             'movimiento_id' => $data['movimiento_id'],
-                            'fecha'=> date('Y-m-d H:i:s'),
-                            'user' => $user->id,
+                            'fecha'         => date('Y-m-d H:i:s'),
+                            'user'          => $user->id,
                         ];
                         $registro->movimientos()->attach($mov);
-                        
-                        $data['transito'] = 4;                        
+
+                        $data['transito']     = 4;
                         $registro->almacen_id = $data['almacen_id'];
-                        $registro->transito = $data['transito'];
+                        $registro->transito   = $data['transito'];
                         $registro->save();
 
                         $registrado = true;
-                        $dato=[
-                            'folio' => $data['folio'],
+                        $dato       = [
+                            'folio'         => $data['folio'],
                             'movimiento_id' => $data['movimiento_id'],
-                            'desc_insumo' => $registro['desc_insumo'],
+                            'desc_insumo'   => $registro['desc_insumo'],
                         ];
                     }
-                    break; 
+                    break;
                 case "2": // Salida
-                    if( $registro->almacen_id == $data['almacen_id'] && $registro->transito == '0' ) // SI ESTA EN EL ALMACEN
+                    if ($registro->almacen_id == $data['almacen_id'] && $registro->transito == '0') // SI ESTA EN EL ALMACEN
                     {
-                        $mov[0]=[
-                            'almacen_id'=> $data['almacen_id'],
+                        $mov[0] = [
+                            'almacen_id'    => $data['almacen_id'],
                             'movimiento_id' => $data['movimiento_id'],
-                            'fecha'=> date('Y-m-d H:i:s'),
-                            'trasp_id' => $data['trasp_id'],
-                            'user' => $user->id,
+                            'fecha'         => date('Y-m-d H:i:s'),
+                            'trasp_id'      => $data['trasp_id'],
+                            'user'          => $user->id,
                         ];
 
                         $registro->movimientos()->attach($mov);
@@ -135,144 +130,148 @@ class controladorMovimientos extends Controller
                         $registro->save();
                         $registrado = true;
 
-                        $lista = Movimiento::lista(['id' => $data['trasp_id'] ])->get();
-                        $tras = Traspaso::find($data['trasp_id']);
-                        $dato=[
-                            'id' => $data['trasp_id'],
-                            'folio' =>$data['folio'],
-                            'movimiento_id' => $data['movimiento_id'],
-                            'desc_insumo' => $registro['desc_insumo'],
-                            'recibe' => $tras->recibe,
-                            'movimientos' => $lista,
+                        $lista = Movimiento::lista(['id' => $data['trasp_id']])->get();
+                        $tras  = Traspaso::find($data['trasp_id']);
+                        $dato  = [
+                            'id'                     => $data['trasp_id'],
+                            'folio'                  => $data['folio'],
+                            'movimiento_id'          => $data['movimiento_id'],
+                            'desc_insumo'            => $registro['desc_insumo'],
+                            'recibe'                 => $tras->recibe,
+                            'movimientos'            => $lista,
                             'movimientos_detallados' => $tras->ItemsArray,
-                            'edit' => $tras->edit,
+                            'edit'                   => $tras->edit,
                         ];
                     }
 
                     break;
                 case "6": // Traspaso
 
-                    if( $registro->almacen_id == $data['almacen_id'] )
-                    {
-                        $mov[0]=[
-                            'almacen_id'=> $data['almacen_id'],
+                    if ($registro->almacen_id == $data['almacen_id']) {
+                        $mov[0] = [
+                            'almacen_id'    => $data['almacen_id'],
                             'movimiento_id' => $data['movimiento_id'],
-                            'fecha'=> date('Y-m-d H:i:s'),
-                            'user' => $user->id,
+                            'fecha'         => date('Y-m-d H:i:s'),
+                            'user'          => $user->id,
                         ];
                         $registro->movimientos()->attach($mov);
-                        
-                        $data['transito'] = 6;                        
+
+                        $data['transito']     = 6;
                         $registro->almacen_id = $data['almacen_id'];
-                        $registro->transito = $data['transito'];
+                        $registro->transito   = $data['transito'];
                         $registro->save();
 
                         $registrado = true;
-                        $dato=[
-                            'folio' =>$data['folio'],
+                        $dato       = [
+                            'folio'         => $data['folio'],
                             'movimiento_id' => $data['movimiento_id'],
-                            'desc_insumo' => $registro['desc_insumo'],
+                            'desc_insumo'   => $registro['desc_insumo'],
                         ];
                     }
 
-                break;
+                    break;
                 case "3": // Cancelacion - Si esta vendido o traspasado,
-                          // y el almacen que al que regresa debe ser el mismo que libero
-                    $admin_user = User::where('tarjeta','=',$data['tarjeta'])->first();
+                    // y el almacen que al que regresa debe ser el mismo que libero
+                    $admin_user = User::where('tarjeta', '=', $data['tarjeta'])->first();
 
-                    if(!empty($admin_user)){
-                        if($admin_user->tipo == 3 || $admin_user->tipo == 1){
-                            if( ( $registro->transito == 4 || $registro->transito == 6 ) && ($registro->almacen_id == $data['almacen_id']) )
-                            {
-                                $mov[0]=[
-                                    'almacen_id'=> $data['almacen_id'],
+                    if (!empty($admin_user)) {
+                        if ($admin_user->tipo == 3 || $admin_user->tipo == 1) {
+                            if (($registro->transito == 4 || $registro->transito == 6) && ($registro->almacen_id == $data['almacen_id'])) {
+                                $mov[0] = [
+                                    'almacen_id'    => $data['almacen_id'],
                                     'movimiento_id' => $data['movimiento_id'],
-                                    'fecha'=> date('Y-m-d H:i:s'),
-                                    'user' => $user->id,
+                                    'fecha'         => date('Y-m-d H:i:s'),
+                                    'user'          => $user->id,
                                 ];
                                 $registro->movimientos()->attach($mov);
-                                
+
                                 $registro->almacen_id = $data['almacen_id'];
-                                $registro->transito = 0;
+                                $registro->transito   = 0;
                                 $registro->save();
-                                
+
                                 $registrado = true;
-                                $dato=[
-                                    'folio' =>$registro->id,
+                                $dato       = [
+                                    'folio'         => $registro->id,
                                     'movimiento_id' => $registro->movimiento_id,
-                                    'desc_insumo' => $registro['desc_insumo'],
+                                    'desc_insumo'   => $registro['desc_insumo'],
                                 ];
                             }
                         }
                     }
-                break;
+                    break;
             }
-            $ubicacion=[
-                'almacen' => $registro->almacen->nombre,
+            $ubicacion = [
+                'almacen'  => $registro->almacen->nombre,
                 'transito' => $registro->transito,
             ];
         }
-        return response()->json(['registrado' => $registrado, 'ubicacion'=> $ubicacion, 'movimiento' => $dato ]);
+        return response()->json(['registrado' => $registrado, 'ubicacion' => $ubicacion, 'movimiento' => $dato]);
     }
-    
-    public function movimientosPorFolio($folio){
-        $lista = Movimientos::where('id_botella','=',$folio)->get();
+
+    public function movimientosPorFolio($folio)
+    {
+        $lista = Movimientos::where('id_botella', '=', $folio)->get();
         return response()->json($lista);
     }
-    
+
     public function reportes()
     {
-        $lista='';
-        $reporte='';
+        $lista   = '';
+        $reporte = '';
 
-        $fechaInicial = $_GET["fechaInicial"]; $tipo=1;
-        if( isset($_GET["fechaFinal"]) ) { $fechaFinal = $_GET["fechaFinal"]; $tipo=$tipo+1; }
-        if( isset($_GET["almacen"]) )    { $almacen    = $_GET["almacen"];    $tipo=$tipo+2; }
-        if( isset($_GET["movimiento"]) ) { $movimiento = $_GET["movimiento"]; $tipo=$tipo+4; }
+        $fechaInicial = $_GET["fechaInicial"];
+        $tipo         = 1;
+        if (isset($_GET["fechaFinal"])) {
+            $fechaFinal = $_GET["fechaFinal"];
+            $tipo       = $tipo + 1;}
+        if (isset($_GET["almacen"])) {
+            $almacen = $_GET["almacen"];
+            $tipo    = $tipo + 2;}
+        if (isset($_GET["movimiento"])) {
+            $movimiento = $_GET["movimiento"];
+            $tipo       = $tipo + 4;}
 
-        switch($tipo){
+        switch ($tipo) {
             case 1: // Fecha inicial
-                $lista = Movimiento::where('fecha','like',$fechaInicial.'%')->get();
-            break;
+                $lista = Movimiento::where('fecha', 'like', $fechaInicial . '%')->get();
+                break;
             case 2: // Fecha inicial, Fecha final
-                $lista = Movimiento::whereDate('fecha','>=',$fechaInicial)
-                        ->whereDate('fecha','<=',$fechaFinal)->get();
-            break;
+                $lista = Movimiento::whereDate('fecha', '>=', $fechaInicial)
+                    ->whereDate('fecha', '<=', $fechaFinal)->get();
+                break;
             case 3: // Fecha inicial, Almacen
-                $lista = Movimiento::where('fecha','like',$fechaInicial.'%')
-                        ->where('almacen_id','=',$almacen)->get();
-            break;
+                $lista = Movimiento::where('fecha', 'like', $fechaInicial . '%')
+                    ->where('almacen_id', '=', $almacen)->get();
+                break;
             case 4: // Fecha inicial, Fecha final, Almacen
-                 $lista = Movimiento::whereDate('fecha','>=',$fechaInicial)
-                        ->whereDate('fecha','<=',$fechaFinal)
-                        ->where('almacen_id','=',$almacen)->get();
-            break;
+                $lista = Movimiento::whereDate('fecha', '>=', $fechaInicial)
+                    ->whereDate('fecha', '<=', $fechaFinal)
+                    ->where('almacen_id', '=', $almacen)->get();
+                break;
             case 5: // Fecha inicial, movimiento
-                $lista = Movimiento::where('fecha','like',$fechaInicial.'%')
-                ->where('movimiento_id','=',$movimiento)->get();
-            break;
-            case 6: // Fecha inicial, Fecha final, Movimiento 
-                 $lista = Movimiento::whereDate('fecha','>=',$fechaInicial)
-                        ->whereDate('fecha','<=',$fechaFinal)
-                        ->where('movimiento_id','=',$movimiento)->get();
-            break;
+                $lista = Movimiento::where('fecha', 'like', $fechaInicial . '%')
+                    ->where('movimiento_id', '=', $movimiento)->get();
+                break;
+            case 6: // Fecha inicial, Fecha final, Movimiento
+                $lista = Movimiento::whereDate('fecha', '>=', $fechaInicial)
+                    ->whereDate('fecha', '<=', $fechaFinal)
+                    ->where('movimiento_id', '=', $movimiento)->get();
+                break;
             case 7: // Fecha inicial, almacen, movimiento
-                $lista = Movimiento::where('fecha','like',$fechaInicial.'%')
-                        ->where('almacen_id','=',$almacen)
-                        ->where('movimiento_id','=',$movimiento)->get();
-            break;
+                $lista = Movimiento::where('fecha', 'like', $fechaInicial . '%')
+                    ->where('almacen_id', '=', $almacen)
+                    ->where('movimiento_id', '=', $movimiento)->get();
+                break;
             case 8: // Fecha inicial, Fecha final, almacen, movimiento
-                $lista = Movimiento::whereDate('fecha','>=',$fechaInicial)
-                        ->whereDate('fecha','<=',$fechaFinal)
-                        ->where('almacen_id','=',$almacen)
-                        ->where('movimiento_id','=',$movimiento)->get();
-            break;
+                $lista = Movimiento::whereDate('fecha', '>=', $fechaInicial)
+                    ->whereDate('fecha', '<=', $fechaFinal)
+                    ->where('almacen_id', '=', $almacen)
+                    ->where('movimiento_id', '=', $movimiento)->get();
+                break;
         }
 
-        if(!$lista->isEmpty())
-        {
-            $reporte = $lista->transform(function($datos)
-            {
+        if (!$lista->isEmpty()) {
+            $reporte = $lista->transform(function ($datos) {
                 return $this->GenerarReporte($datos);
             });
         }
@@ -283,91 +282,98 @@ class controladorMovimientos extends Controller
     public function GenerarReporte($datos)
     {
         return [
-            'fecha' =>         $datos->fecha,
+            'fecha'         => $datos->fecha,
             'movimiento_id' => $datos->movimiento_id,
-            'botella_id' =>    $datos->botella_id,
-            'botella_desc' =>  $datos->botella['desc_insumo'],
-            'almacen_id' =>    $datos->almacen->nombre,
+            'botella_id'    => $datos->botella_id,
+            'botella_desc'  => $datos->botella['desc_insumo'],
+            'almacen_id'    => $datos->almacen->nombre,
         ];
     }
 
     public function generarReporteDeTraspaso($traspaso)
     {
-        $data = Movimiento::lista(['id' => $traspaso])->get();
+        $data         = Movimiento::lista(['id' => $traspaso])->get();
         $dataTraspaso = Traspaso::find($traspaso);
 
         $dataTraspaso->edit = 0;
 
         $dataTraspaso->save();
 
-        $pdf = PDF::loadView('pdf.traspaso', ['data'=>$data, 'dataTraspaso' => $dataTraspaso] );
+        $pdf = PDF::loadView('pdf.traspaso', ['data' => $data, 'dataTraspaso' => $dataTraspaso]);
         $pdf->setPaper('letter');
         $pdf->output();
         $dom_pdf = $pdf->getDomPDF();
-        $canvas = $dom_pdf ->get_canvas();
+        $canvas  = $dom_pdf->get_canvas();
         $canvas->page_text(25, 760, "WeNatives 2019.", null, 10, array(0, 0, 0));
         return $pdf->stream("Movimientos.pdf");
     }
 
     public function imprimirReporteDeBusqueda()
     {
-        $lista='';
-        $reporte='';
+        $lista   = '';
+        $reporte = '';
 
-        $fechaFinal=NULL;
-        $almacen=NULL;
-        $movimiento=NULL;
-        
-        $fechaInicial = $_GET["fechaInicial"]; $tipo=1;
-        if( isset($_GET["fechaFinal"]) ) { $fechaFinal = $_GET["fechaFinal"]; $tipo=$tipo+1; }
-        if( isset($_GET["almacen"]) )    { $almacen    = $_GET["almacen"];    $tipo=$tipo+2; }
-        if( isset($_GET["movimiento"]) ) { $movimiento = $_GET["movimiento"]; $tipo=$tipo+4; }
+        $fechaFinal = null;
+        $almacen    = null;
+        $movimiento = null;
 
-        switch($tipo){
+        $fechaInicial = $_GET["fechaInicial"];
+        $tipo         = 1;
+        if (isset($_GET["fechaFinal"])) {
+            $fechaFinal = $_GET["fechaFinal"];
+            $tipo       = $tipo + 1;}
+        if (isset($_GET["almacen"])) {
+            $almacen = $_GET["almacen"];
+            $tipo    = $tipo + 2;}
+        if (isset($_GET["movimiento"])) {
+            $movimiento = $_GET["movimiento"];
+            $tipo       = $tipo + 4;}
+
+        switch ($tipo) {
             case 1: // Fecha inicial
-                $lista = Movimiento::where('fecha','like',$fechaInicial.'%')->get();
-            break;
+                $lista = Movimiento::where('fecha', 'like', $fechaInicial . '%')->get();
+                break;
             case 2: // Fecha inicial, Fecha final
-                $lista = Movimiento::whereDate('fecha','>=',$fechaInicial)
-                        ->whereDate('fecha','<=',$fechaFinal)->get();
-            break;
+                $lista = Movimiento::whereDate('fecha', '>=', $fechaInicial)
+                    ->whereDate('fecha', '<=', $fechaFinal)->get();
+                break;
             case 3: // Fecha inicial, Almacen
-                $lista = Movimiento::where('fecha','like',$fechaInicial.'%')
-                        ->where('almacen_id','=',$almacen)->get();
-            break;
+                $lista = Movimiento::where('fecha', 'like', $fechaInicial . '%')
+                    ->where('almacen_id', '=', $almacen)->get();
+                break;
             case 4: // Fecha inicial, Fecha final, Almacen
-                 $lista = Movimiento::whereDate('fecha','>=',$fechaInicial)
-                        ->whereDate('fecha','<=',$fechaFinal)
-                        ->where('almacen_id','=',$almacen)->get();
-            break;
+                $lista = Movimiento::whereDate('fecha', '>=', $fechaInicial)
+                    ->whereDate('fecha', '<=', $fechaFinal)
+                    ->where('almacen_id', '=', $almacen)->get();
+                break;
             case 5: // Fecha inicial, movimiento
-                $lista = Movimiento::where('fecha','like',$fechaInicial.'%')
-                ->where('movimiento_id','=',$movimiento)->get();
-            break;
-            case 6: // Fecha inicial, Fecha final, Movimiento 
-                 $lista = Movimiento::whereDate('fecha','>=',$fechaInicial)
-                        ->whereDate('fecha','<=',$fechaFinal)
-                        ->where('movimiento_id','=',$movimiento)->get();
-            break;
+                $lista = Movimiento::where('fecha', 'like', $fechaInicial . '%')
+                    ->where('movimiento_id', '=', $movimiento)->get();
+                break;
+            case 6: // Fecha inicial, Fecha final, Movimiento
+                $lista = Movimiento::whereDate('fecha', '>=', $fechaInicial)
+                    ->whereDate('fecha', '<=', $fechaFinal)
+                    ->where('movimiento_id', '=', $movimiento)->get();
+                break;
             case 7: // Fecha inicial, almacen, movimiento
-                $lista = Movimiento::where('fecha','like',$fechaInicial.'%')
-                        ->where('almacen_id','=',$almacen)
-                        ->where('movimiento_id','=',$movimiento)->get();
-            break;
+                $lista = Movimiento::where('fecha', 'like', $fechaInicial . '%')
+                    ->where('almacen_id', '=', $almacen)
+                    ->where('movimiento_id', '=', $movimiento)->get();
+                break;
             case 8: // Fecha inicial, Fecha final, almacen, movimiento
-                $lista = Movimiento::whereDate('fecha','>=',$fechaInicial)
-                        ->whereDate('fecha','<=',$fechaFinal)
-                        ->where('almacen_id','=',$almacen)
-                        ->where('movimiento_id','=',$movimiento)->get();
-            break;
+                $lista = Movimiento::whereDate('fecha', '>=', $fechaInicial)
+                    ->whereDate('fecha', '<=', $fechaFinal)
+                    ->where('almacen_id', '=', $almacen)
+                    ->where('movimiento_id', '=', $movimiento)->get();
+                break;
         }
-        $reporte = $lista->transform( function($datos) { return $this->GenerarReporte($datos); } );
+        $reporte = $lista->transform(function ($datos) {return $this->GenerarReporte($datos);});
         $logo = storage_path('/app/images/papaslogoonwhite.jpg');
-        $pdf = PDF::loadView('pdf.reporte', ['fecha1'=>$fechaInicial, 'fecha2'=>$fechaFinal, 'area'=>$almacen, 'movimiento'=>$movimiento, 'movimientos'=> $reporte] );
+        $pdf  = PDF::loadView('pdf.reporte', ['fecha1' => $fechaInicial, 'fecha2' => $fechaFinal, 'area' => $almacen, 'movimiento' => $movimiento, 'movimientos' => $reporte]);
         $pdf->setPaper('letter');
         $pdf->output();
         $dom_pdf = $pdf->getDomPDF();
-        $canvas = $dom_pdf ->get_canvas();
+        $canvas  = $dom_pdf->get_canvas();
         //$canvas->image($logo, 35, 38, 100, 32);
         $canvas->page_text(25, 760, "WeNatives 2019.", null, 10, array(0, 0, 0));
         $canvas->page_text(520, 760, "Página {PAGE_NUM} de {PAGE_COUNT}", null, 10, array(0, 0, 0));
@@ -377,11 +383,11 @@ class controladorMovimientos extends Controller
     public function GenerarReporteDeInventario($datos)
     {
         return [
-            'id' =>          $datos->id,
-            'insumo' =>      $datos->insumo,
+            'id'          => $datos->id,
+            'insumo'      => $datos->insumo,
             'desc_insumo' => $datos->desc_insumo,
-            'almacen_id' =>  $datos->almacen->nombre,
-            'cantidad'   =>  $datos->cantidad,
+            'almacen_id'  => $datos->almacen->nombre,
+            'cantidad'    => $datos->cantidad,
         ];
     }
 
@@ -390,63 +396,59 @@ class controladorMovimientos extends Controller
 
         /*utilizaremos un scope en el modelo de botella*/
         $reporte = botella::InventarioPorArea([
-            'almacen'=>$area,
-            'desglosar'     => isset($_GET["desglosar"]) ? $_GET["desglosar"] : null, 
-            'take'     => isset($_GET["take"]) ? $_GET["take"] : null,                     
-            'skip'    => isset($_GET["skip"]) ? $_GET["skip"] : null,
-            'pdf'=>0,
-            ])->get();
+            'almacen'   => $area,
+            'desglosar' => isset($_GET["desglosar"]) ? $_GET["desglosar"] : null,
+            'take'      => isset($_GET["take"]) ? $_GET["take"] : null,
+            'skip'      => isset($_GET["skip"]) ? $_GET["skip"] : null,
+            'pdf'       => 0,
+        ])->get();
         $conteo = botella::InventarioPorAreaConteo([
-            'almacen'=>$area,
-            'desglosar'     => isset($_GET["desglosar"]) ? $_GET["desglosar"] : null,
-            ])->get();
+            'almacen'   => $area,
+            'desglosar' => isset($_GET["desglosar"]) ? $_GET["desglosar"] : null,
+        ])->get();
 
-        $reporte->transform(function($datos)
-        {
+        $reporte->transform(function ($datos) {
             return $this->GenerarReporteDeInventario($datos);
         });
 
-        return response()->json(['botellas'=>$reporte,'total'=>isset($conteo[0])? $conteo[0]['total'] : 0 ]);
+        return response()->json(['botellas' => $reporte, 'total' => isset($conteo[0]) ? $conteo[0]['total'] : 0, 'contador' => $conteo]);
     }
 
-     public function inventarioPDF($area,$desglosar){
+    public function inventarioPDF($area, $desglosar)
+    {
 
         /*utilizaremos un scope en el modelo de botella*/
         $reporte = botella::InventarioPorArea([
             'almacen'   => $area,
-            'desglosar' => $desglosar, 
+            'desglosar' => $desglosar,
             'pdf'       => 1,
         ])->get();
         $fecha = date(' d / M / Y');
-        $hora = date('H:i:s', time());
-       
-        $reporte->transform(function($datos)
-        {
+        $hora  = date('H:i:s', time());
+
+        $reporte->transform(function ($datos) {
             return $this->GenerarReporteDeInventario($datos);
         });
-       
-        if((int)$area==9999)
-        {
-            $almacen='Todas Las Areas';
-        }
-        else
-        {
-            $registro=Almacen::find($area);
-            $almacen=$registro->nombre;
+
+        if ((int) $area == 9999) {
+            $almacen = 'Todas Las Areas';
+        } else {
+            $registro = Almacen::find($area);
+            $almacen  = $registro->nombre;
         }
         $logo = storage_path('/app/images/papaslogoonwhite.jpeg');
 
-        $pdf = PDF::loadView('pdf.inventario', ['data'=>$reporte, 'desglosar'=>$desglosar, 'area'=>$area, 'almacen'=>$almacen,'fecha'=>$fecha,'hora'=>$hora] );
+        $pdf = PDF::loadView('pdf.inventario', ['data' => $reporte, 'desglosar' => $desglosar, 'area' => $area, 'almacen' => $almacen, 'fecha' => $fecha, 'hora' => $hora]);
         $pdf->setPaper('letter');
         $pdf->output();
         $dom_pdf = $pdf->getDomPDF();
-        $canvas = $dom_pdf ->get_canvas();
+        $canvas  = $dom_pdf->get_canvas();
         //$canvas->image($logo, 30, 38, 80, 32);
         $canvas->page_text(35, 760, "WeNatives 2019.", null, 10, array(0, 0, 0));
         $canvas->page_text(510, 760, "Página {PAGE_NUM} de {PAGE_COUNT}", null, 10, array(0, 0, 0));
         return $pdf->stream("Inventario.pdf");
 
-        return response()->json(['botellas'=>$reporte ]);
+        return response()->json(['botellas' => $reporte]);
     }
-    
+
 }

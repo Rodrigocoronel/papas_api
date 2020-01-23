@@ -1,0 +1,18 @@
+/*importacion de bd del servidor a local
+  cd /xampp\mysql\bin     
+  mysql -h localhost -u root -p 
+  **ingresas password
+  use bdname ;
+  source filename.sql
+
+  drop database papas_botellas;
+  create database papas_botellas;
+  use papas_botellas;
+  source pbbttle.sql;
+
+  el archivo filename.sql tiene que estar en la carpeta bin
+
+  ALTER TABLE `users` ADD `notificacion` INT NOT NULL DEFAULT '0' AFTER `inactivo`;
+  ALTER TABLE `users` CHANGE `empresa` `empresa` INT(11) NOT NULL DEFAULT '0';
+
+  */
