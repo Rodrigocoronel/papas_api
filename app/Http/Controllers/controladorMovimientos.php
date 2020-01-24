@@ -396,15 +396,21 @@ class controladorMovimientos extends Controller
 
         /*utilizaremos un scope en el modelo de botella*/
         $reporte = botella::InventarioPorArea([
-            'almacen'   => $area,
-            'desglosar' => isset($_GET["desglosar"]) ? $_GET["desglosar"] : null,
-            'take'      => isset($_GET["take"]) ? $_GET["take"] : null,
-            'skip'      => isset($_GET["skip"]) ? $_GET["skip"] : null,
-            'pdf'       => 0,
+            'almacen'     => $area,
+            'desglosar'   => isset($_GET["desglosar"]) ? $_GET["desglosar"] : null,
+            'id'          => isset($_GET["id"]) ? $_GET["id"] : null,
+            'descripcion' => isset($_GET["descripcion"]) ? $_GET["descripcion"] : null,
+            'insumo'      => isset($_GET["insumo"]) ? $_GET["insumo"] : null,
+            'take'        => isset($_GET["take"]) ? $_GET["take"] : null,
+            'skip'        => isset($_GET["skip"]) ? $_GET["skip"] : null,
+            'pdf'         => 0,
         ])->get();
         $conteo = botella::InventarioPorAreaConteo([
-            'almacen'   => $area,
-            'desglosar' => isset($_GET["desglosar"]) ? $_GET["desglosar"] : null,
+            'almacen'     => $area,
+            'desglosar'   => isset($_GET["desglosar"]) ? $_GET["desglosar"] : null,
+            'id'          => isset($_GET["id"]) ? $_GET["id"] : null,
+            'descripcion' => isset($_GET["descripcion"]) ? $_GET["descripcion"] : null,
+            'insumo'      => isset($_GET["insumo"]) ? $_GET["insumo"] : null,
         ])->get();
 
         $reporte->transform(function ($datos) {
@@ -419,9 +425,12 @@ class controladorMovimientos extends Controller
 
         /*utilizaremos un scope en el modelo de botella*/
         $reporte = botella::InventarioPorArea([
-            'almacen'   => $area,
-            'desglosar' => $desglosar,
-            'pdf'       => 1,
+            'almacen'     => $area,
+            'desglosar'   => $desglosar,
+            'id'          => isset($_GET["id"]) ? $_GET["id"] : null,
+            'descripcion' => isset($_GET["descripcion"]) ? $_GET["descripcion"] : null,
+            'insumo'      => isset($_GET["insumo"]) ? $_GET["insumo"] : null,
+            'pdf'         => 1,
         ])->get();
         $fecha = date(' d / M / Y');
         $hora  = date('H:i:s', time());

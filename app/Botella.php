@@ -116,6 +116,19 @@ class Botella extends Model
             $query->take($params['take']);
             $query->skip($params['skip']);
         }
+
+        if (isset($params['id']) && $params['id'] != null) {
+            $query->where('id', 'like', "%" . $params['id'] . "%");
+        }
+
+        if (isset($params['insumo']) && $params['insumo'] != null) {
+            $query->where('insumo', 'like', "%" . $params['insumo'] . "%");
+        }
+
+        if (isset($params['descripcion']) && $params['descripcion'] != null) {
+            $query->where('desc_insumo', 'like', "%" . $params['descripcion'] . "%");
+        }
+
         $query->orderBy("botella.insumo", "asc");
 
         return $query;
@@ -137,6 +150,18 @@ class Botella extends Model
             $query->distinct('insumo');
             // $query->groupBy("insumo");
             // $query->groupBy("almacen_id");
+        }
+
+        if (isset($params['id']) && $params['id'] != null) {
+            $query->where('id', 'like', "%" . $params['id'] . "%");
+        }
+
+        if (isset($params['insumo']) && $params['insumo'] != null) {
+            $query->where('insumo', 'like', "%" . $params['insumo'] . "%");
+        }
+
+        if (isset($params['descripcion']) && $params['descripcion'] != null) {
+            $query->where('desc_insumo', 'like', "%" . $params['descripcion'] . "%");
         }
 
         $query->orderBy("botella.insumo", "asc");
